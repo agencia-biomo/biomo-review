@@ -1,36 +1,237 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Biomo Review
 
-## Getting Started
+Sistema de feedback visual para alteracoes de sites. Permite que clientes e equipes colaborem de forma eficiente na revisao de alteracoes em projetos web.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-15.1-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css)
+![Firebase](https://img.shields.io/badge/Firebase-11.0-FFCA28?style=flat-square&logo=firebase)
 
+## Funcionalidades
+
+### Gerenciamento de Projetos
+- Criar, editar e excluir projetos
+- Visualizador de sites via iframe
+- Link publico para compartilhar com clientes
+- Dashboard com estatisticas
+
+### Sistema de Feedback
+- **Marcacao visual**: Clique em qualquer ponto do site para criar feedback
+- **Screenshot automatico**: Captura automatica da area clicada
+- **Gravacao de audio**: Grave explicacoes em audio
+- **Upload de arquivos**: Ate 30MB por arquivo, multiplos anexos
+- **Comparacao antes/depois**: Visualize as mudancas lado a lado
+
+### Workflow de Status
+6 status para controle completo do fluxo:
+
+| Status | Descricao |
+|--------|-----------|
+| `new` | Novo feedback criado |
+| `in_review` | Em analise pela equipe |
+| `in_progress` | Em desenvolvimento |
+| `waiting_client` | Aguardando resposta do cliente |
+| `rejected` | Feedback rejeitado |
+| `completed` | Alteracao concluida |
+
+### Historico de Status
+- Rastreamento completo de todas as mudancas de status
+- Registro de quem alterou (admin/cliente)
+- Timestamp de cada alteracao
+- Notas opcionais em cada transicao
+
+### Sistema de Comentarios
+- Threads de comentarios por feedback
+- Gravacao de audio nos comentarios
+- Mencoes e notificacoes
+
+## Tecnologias
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Estilizacao**: Tailwind CSS, shadcn/ui
+- **Backend**: Next.js API Routes
+- **Banco de Dados**: Firebase Firestore
+- **Storage**: Firebase Storage
+- **Autenticacao**: NextAuth.js
+- **Testes**: Playwright
+
+## Instalacao
+
+### Pre-requisitos
+- Node.js 18+
+- npm ou yarn
+- Conta Firebase (opcional para modo demo)
+
+### Setup
+
+1. Clone o repositorio:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/agencia-biomo/biomo-review.git
+cd biomo-review
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Instale as dependencias:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Configure as variaveis de ambiente:
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Edite o `.env.local` com suas credenciais Firebase (opcional):
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_projeto
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 
-## Learn More
+FIREBASE_ADMIN_PROJECT_ID=seu_projeto
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk@seu_projeto.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-To learn more about Next.js, take a look at the following resources:
+NEXTAUTH_SECRET=sua_chave_secreta
+NEXTAUTH_URL=http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+6. Acesse http://localhost:3000
 
-## Deploy on Vercel
+## Modo Demo
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+O sistema funciona sem Firebase configurado usando um banco de dados em memoria (mock). Ideal para testes e desenvolvimento.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Credenciais de Demo:
+| Usuario | Email | Senha |
+|---------|-------|-------|
+| Admin | admin@biomo.com.br | admin123 |
+| Equipe | equipe@biomo.com.br | equipe123 |
+
+## Scripts Disponiveis
+
+```bash
+# Desenvolvimento
+npm run dev              # Inicia servidor de desenvolvimento
+npm run dev:emulator     # Inicia com Firebase Emulator
+
+# Build
+npm run build            # Build de producao
+npm run start            # Inicia servidor de producao
+
+# Testes
+npm run test:e2e         # Testes E2E com Playwright
+npm run test:visual      # Testes visuais
+
+# Linting
+npm run lint             # Executa ESLint
+```
+
+## Estrutura do Projeto
+
+```
+src/
+├── app/                    # App Router (Next.js 15)
+│   ├── api/               # API Routes
+│   │   ├── feedbacks/     # CRUD de feedbacks
+│   │   ├── projects/      # CRUD de projetos
+│   │   ├── comments/      # Sistema de comentarios
+│   │   └── upload/        # Upload de arquivos
+│   ├── login/             # Pagina de login
+│   ├── projetos/[id]/     # Visualizador de projeto (admin)
+│   └── p/[token]/         # Visualizador publico (cliente)
+├── components/
+│   ├── feedback/          # Componentes de feedback
+│   │   ├── FeedbackModal.tsx
+│   │   ├── FeedbackDetailModal.tsx
+│   │   ├── FeedbackTimeline.tsx
+│   │   ├── StatusHistoryTimeline.tsx
+│   │   ├── CommentThread.tsx
+│   │   └── BeforeAfterComparison.tsx
+│   ├── project/           # Componentes de projeto
+│   └── ui/                # Componentes UI (shadcn)
+├── lib/                   # Utilitarios
+│   ├── firebase.ts        # Config Firebase Client
+│   ├── firebase-admin.ts  # Config Firebase Admin
+│   ├── mock-db.ts         # Mock database
+│   └── auth.ts            # Config NextAuth
+└── types/                 # TypeScript types
+    └── index.ts
+```
+
+## API Reference
+
+### Projetos
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/api/projects` | Lista todos os projetos |
+| POST | `/api/projects` | Cria novo projeto |
+| GET | `/api/projects/[id]` | Busca projeto por ID |
+| PATCH | `/api/projects/[id]` | Atualiza projeto |
+| DELETE | `/api/projects/[id]` | Remove projeto |
+
+### Feedbacks
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/api/feedbacks?projectId=xxx` | Lista feedbacks do projeto |
+| POST | `/api/feedbacks` | Cria novo feedback |
+| GET | `/api/feedbacks/[id]` | Busca feedback por ID |
+| PATCH | `/api/feedbacks/[id]` | Atualiza feedback/status |
+| DELETE | `/api/feedbacks/[id]` | Remove feedback |
+
+## Deploy
+
+### Vercel (Recomendado)
+
+1. Conecte seu repositorio ao Vercel
+2. Configure as variaveis de ambiente
+3. Deploy automatico a cada push
+
+### Firebase Hosting
+
+```bash
+npm run build
+firebase deploy
+```
+
+## Contribuicao
+
+1. Fork o projeto
+2. Crie sua branch (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudancas (`git commit -m 'feat: adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+### Conventional Commits
+
+Este projeto segue o padrao [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` Nova funcionalidade
+- `fix:` Correcao de bug
+- `docs:` Documentacao
+- `style:` Formatacao
+- `refactor:` Refatoracao
+- `test:` Testes
+- `chore:` Tarefas de manutencao
+
+## Licenca
+
+MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## Contato
+
+**Agencia Biomo**
+- Website: [biomo.com.br](https://biomo.com.br)
+- Email: contato@biomo.com.br
+
+---
+
+Desenvolvido com muito cafe por [Agencia Biomo](https://biomo.com.br)

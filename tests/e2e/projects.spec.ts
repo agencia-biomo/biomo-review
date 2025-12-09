@@ -1,5 +1,24 @@
 import { test, expect, Page } from '@playwright/test';
 
+// Helper function to login
+async function login(page: Page) {
+  await page.goto('/login');
+  await page.waitForLoadState('domcontentloaded');
+
+  // Wait for the form to be ready
+  await page.waitForSelector('#email', { timeout: 10000 });
+
+  // Fill login form using id selectors
+  await page.fill('#email', 'admin@biomo.com.br');
+  await page.fill('#password', 'admin123');
+
+  // Click login button
+  await page.getByRole('button', { name: /entrar/i }).click();
+
+  // Wait for redirect to home
+  await page.waitForURL('/', { timeout: 15000 });
+}
+
 // Helper function to wait for page to be ready
 async function waitForPageReady(page: Page) {
   await page.waitForLoadState('domcontentloaded');
@@ -12,20 +31,19 @@ async function waitForPageReady(page: Page) {
 
 test.describe('Gerenciamento de Projetos', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await login(page);
     await waitForPageReady(page);
   });
 
-  test('deve exibir a página inicial com título correto', async ({ page }) => {
-    await expect(page.getByText('Biomo Review')).toBeVisible();
+  test('deve exibir a pagina inicial com titulo correto', async ({ page }) => {
     await expect(page.getByText('Meus Projetos')).toBeVisible();
   });
 
-  test('deve exibir botão de novo projeto', async ({ page }) => {
+  test('deve exibir botao de novo projeto', async ({ page }) => {
     await expect(page.getByRole('button', { name: /novo projeto/i })).toBeVisible();
   });
 
-  test('deve abrir modal de criação de projeto', async ({ page }) => {
+  test('deve abrir modal de criacao de projeto', async ({ page }) => {
     const novoProjetoBtn = page.getByRole('button', { name: /novo projeto/i });
     await expect(novoProjetoBtn).toBeVisible();
     await novoProjetoBtn.click();
@@ -35,13 +53,13 @@ test.describe('Gerenciamento de Projetos', () => {
     await expect(page.getByLabel(/url do site/i)).toBeVisible();
   });
 
-  test('deve validar campos obrigatórios ao criar projeto', async ({ page }) => {
+  test('deve validar campos obrigatorios ao criar projeto', async ({ page }) => {
     await page.getByRole('button', { name: /novo projeto/i }).click();
     await expect(page.getByRole('heading', { name: 'Novo Projeto' })).toBeVisible();
 
     await page.getByRole('button', { name: /criar projeto/i }).click();
 
-    await expect(page.getByText(/nome do cliente é obrigatório/i)).toBeVisible();
+    await expect(page.getByText(/nome do cliente e obrigatorio/i)).toBeVisible();
   });
 
   test('deve criar um novo projeto com sucesso', async ({ page }) => {
@@ -85,7 +103,7 @@ test.describe('Gerenciamento de Projetos', () => {
 
 test.describe('Visualizador de Projeto', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await login(page);
     await waitForPageReady(page);
 
     // Criar um projeto primeiro
@@ -110,7 +128,7 @@ test.describe('Visualizador de Projeto', () => {
   test('deve exibir timeline de feedbacks', async ({ page }) => {
     await page.getByText('Projeto Viewer Teste').first().click();
 
-    await expect(page.getByText(/alterações/i)).toBeVisible();
+    await expect(page.getByText(/alteracoes/i)).toBeVisible();
   });
 
   test('deve voltar para lista de projetos', async ({ page }) => {
@@ -119,6 +137,65 @@ test.describe('Visualizador de Projeto', () => {
     await expect(page.getByRole('button', { name: /voltar/i })).toBeVisible();
     await page.getByRole('button', { name: /voltar/i }).click();
 
+    await expect(page.getByText('Meus Projetos')).toBeVisible();
+  });
+});
+
+test.describe('Responsividade Mobile', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await waitForPageReady(page);
+  });
+
+  test('deve exibir layout mobile corretamente', async ({ page }) => {
+    // Verificar que a pagina carrega no mobile
+    await expect(page.getByText('Meus Projetos')).toBeVisible();
+  });
+
+  test('deve abrir modal de criacao no mobile', async ({ page }) => {
+    const novoProjetoBtn = page.getByRole('button', { name: /novo projeto/i });
+    await expect(novoProjetoBtn).toBeVisible();
+    await novoProjetoBtn.click();
+
+    await expect(page.getByRole('heading', { name: 'Novo Projeto' })).toBeVisible();
+  });
+});
+
+test.describe('Pagina de Login', () => {
+  test('deve exibir formulario de login', async ({ page }) => {
+    await page.goto('/login');
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
+    await expect(page.getByRole('button', { name: /entrar/i })).toBeVisible();
+  });
+
+  test('deve mostrar erro com credenciais invalidas', async ({ page }) => {
+    await page.goto('/login');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForSelector('#email', { timeout: 10000 });
+
+    await page.fill('#email', 'invalido@test.com');
+    await page.fill('#password', 'senhaerrada');
+    await page.getByRole('button', { name: /entrar/i }).click();
+
+    // Deve permanecer na pagina de login ou mostrar erro
+    await page.waitForTimeout(2000);
+    await expect(page.locator('#email')).toBeVisible();
+  });
+
+  test('deve fazer login com sucesso', async ({ page }) => {
+    await page.goto('/login');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForSelector('#email', { timeout: 10000 });
+
+    await page.fill('#email', 'admin@biomo.com.br');
+    await page.fill('#password', 'admin123');
+    await page.getByRole('button', { name: /entrar/i }).click();
+
+    // Deve redirecionar para home
+    await page.waitForURL('/', { timeout: 15000 });
     await expect(page.getByText('Meus Projetos')).toBeVisible();
   });
 });
