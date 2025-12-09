@@ -31,9 +31,8 @@ export default function LoginPage() {
 
       if (result?.error) {
         setError("Email ou senha incorretos");
-      } else {
-        router.push("/");
-        router.refresh();
+      } else if (result?.ok) {
+        window.location.href = "/";
       }
     } catch {
       setError("Erro ao fazer login");

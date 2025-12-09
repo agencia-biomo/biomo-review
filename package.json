@@ -2,6 +2,9 @@
   "name": "app-alteracao-site-biomo",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20"
+  },
   "scripts": {
     "dev": "next dev",
     "dev:emulator": "concurrently \"firebase emulators:start\" \"next dev\"",

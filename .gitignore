@@ -42,7 +42,17 @@ next-env.d.ts
 
 # firebase functions
 functions/node_modules
+functions/lib
+
+# firebase
+.firebase/
 
 # playwright
 test-results/
 playwright-report/
+
+# arquivos temporários e sensíveis
+arquivo-site/
+*.json:Zone.Identifier
+*.jpg:Zone.Identifier
+*.png:Zone.Identifier
