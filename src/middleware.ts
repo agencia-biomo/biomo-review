@@ -4,9 +4,10 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Get the session token from cookies
-  const sessionToken = request.cookies.get("authjs.session-token")?.value ||
-                       request.cookies.get("__Secure-authjs.session-token")?.value;
+  // Get the session token from __session cookie (Firebase Hosting only forwards this cookie)
+  const sessionToken = request.cookies.get("__session")?.value;
+
+  console.log("[MIDDLEWARE] Path:", pathname, "| Has __session:", !!sessionToken);
 
   // Rotas de autenticacao - SEMPRE permitir acesso
   if (pathname.startsWith("/api/auth")) {

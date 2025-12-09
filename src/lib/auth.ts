@@ -30,7 +30,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
+        console.log("[AUTH] authorize called:", credentials?.email);
+
         if (!credentials?.email || !credentials?.password) {
+          console.log("[AUTH] Missing credentials");
           return null;
         }
 
@@ -40,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (user) {
+          console.log("[AUTH] User found:", user.email);
           return {
             id: user.id,
             email: user.email,
@@ -48,6 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           };
         }
 
+        console.log("[AUTH] User not found");
         return null;
       },
     }),
@@ -74,5 +79,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  // CRITICAL: Firebase Hosting only forwards the __session cookie to Cloud Functions
+  // All other cookies are stripped by the CDN for caching purposes
+  // See: https://firebase.google.com/docs/hosting/manage-cache
+  cookies: {
+    sessionToken: {
+      name: "__session",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+    callbackUrl: {
+      name: "__session-callback",
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+    csrfToken: {
+      name: "__session-csrf",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
   },
 });

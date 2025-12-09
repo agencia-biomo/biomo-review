@@ -8,29 +8,39 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { feedbackId, content, authorId, authorRole, mentions } = body;
+    const { feedbackId, content, authorId, authorRole, mentions, attachments } = body;
 
-    // Validate required fields
-    if (!feedbackId || !content) {
+    console.log('[API/comments POST] Creating comment:', { feedbackId, contentLength: content?.length, attachments: attachments?.length });
+
+    // Validate required fields - content is optional if there are attachments
+    if (!feedbackId) {
       return NextResponse.json(
-        { error: 'Missing required fields: feedbackId, content' },
+        { error: 'Missing required field: feedbackId' },
+        { status: 400 }
+      );
+    }
+
+    // Need at least content or attachments
+    if (!content && (!attachments || attachments.length === 0)) {
+      return NextResponse.json(
+        { error: 'Missing required fields: content or attachments' },
         { status: 400 }
       );
     }
 
     // Extract mentions from content (@username)
-    const extractedMentions = content.match(/@\w+/g)?.map((m: string) => m.slice(1)) || [];
+    const extractedMentions = content ? content.match(/@\w+/g)?.map((m: string) => m.slice(1)) || [] : [];
     const allMentions = [...new Set([...(mentions || []), ...extractedMentions])];
 
     // Use mock if Firebase not configured
     if (!isFirebaseConfigured()) {
       const result = await mockCommentsApi.create({
         feedbackId,
-        content,
+        content: content || '',
         authorId: authorId || 'anonymous',
         authorRole: authorRole || 'client',
         mentions: allMentions,
-        attachments: [],
+        attachments: attachments || [],
       });
 
       return NextResponse.json(
@@ -48,11 +58,11 @@ export async function POST(request: NextRequest) {
     const now = new Date();
     const commentData: Omit<Comment, 'id'> = {
       feedbackId,
-      content,
+      content: content || '',
       authorId: authorId || 'anonymous',
       authorRole: authorRole || 'client',
       mentions: allMentions,
-      attachments: [],
+      attachments: attachments || [],
       createdAt: now,
     };
 
@@ -105,24 +115,36 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Use Firebase
-    const adminDb = getAdminDb();
-    const snapshot = await adminDb
-      .collection('comments')
-      .where('feedbackId', '==', feedbackId)
-      .orderBy('createdAt', 'asc')
-      .get();
+    // Try to use Firebase
+    try {
+      const adminDb = getAdminDb();
+      const snapshot = await adminDb
+        .collection('comments')
+        .where('feedbackId', '==', feedbackId)
+        .orderBy('createdAt', 'asc')
+        .get();
 
-    const comments = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+      const comments = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    return NextResponse.json({
-      success: true,
-      comments,
-      total: comments.length,
-    });
+      return NextResponse.json({
+        success: true,
+        comments,
+        total: comments.length,
+      });
+    } catch (firebaseError) {
+      // Firebase failed, fall back to mock
+      console.error('[API/comments GET] Firebase failed, using mock:', firebaseError);
+      const comments = await mockCommentsApi.getByFeedbackId(feedbackId);
+      return NextResponse.json({
+        success: true,
+        comments,
+        total: comments.length,
+        mode: 'fallback',
+      });
+    }
   } catch (error) {
     console.error('Error fetching comments:', error);
     return NextResponse.json(

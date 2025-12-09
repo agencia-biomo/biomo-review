@@ -7,6 +7,7 @@ import { Project } from "@/types";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { CreateProjectModal, CreateProjectData } from "@/components/project/CreateProjectModal";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileNavProvider, MobileHeader, MobileDrawer } from "@/components/layout/MobileNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,7 +18,6 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
-  AlertCircle,
   LayoutGrid,
   List,
   ArrowUpRight,
@@ -127,12 +127,16 @@ export default function Home() {
   }).length;
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex">
-      {/* Sidebar */}
-      <Sidebar />
+    <MobileNavProvider>
+      <div className="min-h-screen bg-[#09090B] flex flex-col lg:flex-row">
+        {/* Mobile Header */}
+        <MobileHeader />
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+        {/* Desktop Sidebar */}
+        <Sidebar />
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
         {/* Hero Header */}
         <div className="relative overflow-hidden border-b border-white/10">
           {/* Background Effects */}
@@ -141,85 +145,85 @@ export default function Home() {
             <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
           </div>
 
-          <div className="relative px-8 py-10">
+          <div className="relative px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
             {/* Welcome Message */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                  <span className="text-xs font-medium text-purple-300">Dashboard</span>
+            <div className="mb-6 lg:mb-8">
+              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 rounded-full bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30">
+                  <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-purple-400" />
+                  <span className="text-[10px] sm:text-xs font-medium text-purple-300">Dashboard</span>
                 </div>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Bem-vindo, {session?.user?.name || "Usuario"}
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
+                Ola, {session?.user?.name?.split(' ')[0] || "Usuario"}
               </h1>
-              <p className="text-white/60">
-                Gerencie seus projetos e acompanhe o feedback dos clientes
+              <p className="text-sm sm:text-base text-white/60">
+                Gerencie seus projetos e feedbacks
               </p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="group p-5 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                    <FolderOpen className="w-5 h-5 text-white" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="group p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                    <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-purple-400 transition-colors" />
+                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-white/30 group-hover:text-purple-400 transition-colors" />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">{totalProjects}</p>
-                <p className="text-sm text-white/50">Total de Projetos</p>
+                <p className="text-lg sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">{totalProjects}</p>
+                <p className="text-xs sm:text-sm text-white/50">Projetos</p>
               </div>
 
-              <div className="group p-5 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/30">
-                    <TrendingUp className="w-5 h-5 text-white" />
+              <div className="group p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/30">
+                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-green-400 transition-colors" />
+                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-white/30 group-hover:text-green-400 transition-colors" />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">{recentProjects}</p>
-                <p className="text-sm text-white/50">Novos esta semana</p>
+                <p className="text-lg sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">{recentProjects}</p>
+                <p className="text-xs sm:text-sm text-white/50">Novos</p>
               </div>
 
-              <div className="group p-5 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
-                    <Clock className="w-5 h-5 text-white" />
+              <div className="group p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
+                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-yellow-400 transition-colors" />
+                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-white/30 group-hover:text-yellow-400 transition-colors" />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">24</p>
-                <p className="text-sm text-white/50">Feedbacks Pendentes</p>
+                <p className="text-lg sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">24</p>
+                <p className="text-xs sm:text-sm text-white/50">Pendentes</p>
               </div>
 
-              <div className="group p-5 rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-white" />
+              <div className="group p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-blue-400 transition-colors" />
+                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-white/30 group-hover:text-blue-400 transition-colors" />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">156</p>
-                <p className="text-sm text-white/50">Concluidos este mes</p>
+                <p className="text-lg sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">156</p>
+                <p className="text-xs sm:text-sm text-white/50">Concluidos</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Projects Section */}
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {/* Section Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
-              <h2 className="text-xl font-bold text-white">Meus Projetos</h2>
-              <p className="text-sm text-white/50">
-                {filteredProjects.length} projeto{filteredProjects.length !== 1 ? "s" : ""} encontrado{filteredProjects.length !== 1 ? "s" : ""}
+              <h2 className="text-lg sm:text-xl font-bold text-white">Meus Projetos</h2>
+              <p className="text-xs sm:text-sm text-white/50">
+                {filteredProjects.length} projeto{filteredProjects.length !== 1 ? "s" : ""}
               </p>
             </div>
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30"
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30 w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Novo Projeto
@@ -227,38 +231,40 @@ export default function Home() {
           </div>
 
           {/* Search & Filters */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <Input
                 placeholder="Buscar projetos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 h-11 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-500/50 focus:ring-purple-500/20 rounded-xl"
+                className="pl-9 sm:pl-11 h-10 sm:h-11 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-500/50 focus:ring-purple-500/20 rounded-xl text-sm"
               />
             </div>
 
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === "grid"
-                    ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
-                    : "text-white/50 hover:text-white"
-                }`}
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === "list"
-                    ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
-                    : "text-white/50 hover:text-white"
-                }`}
-              >
-                <List className="w-4 h-4" />
-              </button>
+            <div className="flex items-center justify-between sm:justify-start gap-2">
+              <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === "grid"
+                      ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === "list"
+                      ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -304,8 +310,8 @@ export default function Home() {
           ) : (
             <div className={`
               ${viewMode === "grid"
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
-                : "space-y-3"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5"
+                : "space-y-2 sm:space-y-3"
               }
             `}>
               {filteredProjects.map((project, index) => (
@@ -329,12 +335,13 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Create Project Modal */}
-      <CreateProjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateProject}
-      />
-    </div>
+        {/* Create Project Modal */}
+        <CreateProjectModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreateProject}
+        />
+      </div>
+    </MobileNavProvider>
   );
 }

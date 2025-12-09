@@ -64,30 +64,22 @@ export function IframeViewer({
   // Feedback selecionado (com screenshot)
   const selectedFeedback = findSelectedFeedback(feedbacks, selectedFeedbackId);
 
-  // Quando um feedback é selecionado na timeline, mostrar overlay com screenshot
+  // Quando um feedback é selecionado, apenas destacar o pin (sem mostrar preview automaticamente)
   useEffect(() => {
-    if (selectedFeedbackId && selectedFeedback?.screenshot) {
+    if (selectedFeedbackId) {
       setHighlightedPin(selectedFeedbackId);
-      setShowScreenshotOverlay(true);
+      // Não mostrar o overlay automaticamente - só quando clicar no pin
+      // O overlay é mostrado apenas via handlePinClick
 
-      // Auto-hide o overlay após 8 segundos
-      const timer = setTimeout(() => {
-        setShowScreenshotOverlay(false);
-        if (!showAllPins) {
-          setHighlightedPin(null);
-        }
-      }, 8000);
-      return () => clearTimeout(timer);
-    } else if (selectedFeedbackId) {
-      setHighlightedPin(selectedFeedbackId);
       if (!showAllPins) {
+        // Auto-hide o highlight após 5 segundos se não estiver mostrando todos os pins
         const timer = setTimeout(() => {
           setHighlightedPin(null);
         }, 5000);
         return () => clearTimeout(timer);
       }
     }
-  }, [selectedFeedbackId, selectedFeedback?.screenshot, showAllPins]);
+  }, [selectedFeedbackId, showAllPins]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -223,21 +215,21 @@ export function IframeViewer({
 
   return (
     <div className="flex flex-col h-full bg-[#09090B]">
-      {/* Toolbar */}
-      <div className="flex items-center gap-3 p-3 bg-[#0A0A0A] border-b border-white/10 flex-wrap">
-        {/* Mode buttons */}
-        <div className="flex items-center gap-2">
+      {/* Toolbar - Responsiva */}
+      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 p-2 sm:p-3 bg-[#0A0A0A] border-b border-white/10 flex-wrap overflow-x-auto">
+        {/* Mode buttons - Compactos em mobile */}
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button
             variant={mode === "navigation" ? "default" : "ghost"}
             size="sm"
             onClick={() => setMode("navigation")}
-            className={mode === "navigation"
+            className={`h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm ${mode === "navigation"
               ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
               : "text-white/60 hover:text-white hover:bg-white/10"
-            }
+            }`}
           >
-            <MousePointer2 className="w-4 h-4 mr-2" />
-            Navegacao
+            <MousePointer2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Navegacao</span>
           </Button>
           <Button
             variant={mode === "marking" ? "default" : "ghost"}
@@ -246,87 +238,87 @@ export function IframeViewer({
               setMode("marking");
               setCaptureError(null);
             }}
-            className={mode === "marking"
+            className={`h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm ${mode === "marking"
               ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/30"
               : "text-white/60 hover:text-white hover:bg-white/10 border border-red-500/30"
-            }
+            }`}
           >
-            <Target className="w-4 h-4 mr-2" />
-            Marcar Alteracao
+            <Target className="w-3.5 sm:w-4 h-3.5 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Marcar</span>
           </Button>
         </div>
 
-        <div className="h-6 w-px bg-white/10" />
+        <div className="hidden sm:block h-6 w-px bg-white/10" />
 
-        {/* Viewport buttons */}
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
+        {/* Viewport buttons - Ocultos em mobile muito pequeno */}
+        <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setViewport("responsive")}
             title="Responsivo (100%)"
-            className={viewport === "responsive"
+            className={`h-7 w-7 sm:h-8 sm:w-8 ${viewport === "responsive"
               ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
               : "text-white/50 hover:text-white hover:bg-white/10"
-            }
+            }`}
           >
-            <Maximize2 className="w-4 h-4" />
+            <Maximize2 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setViewport("mobile")}
             title="Mobile (375px)"
-            className={viewport === "mobile"
+            className={`h-7 w-7 sm:h-8 sm:w-8 ${viewport === "mobile"
               ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
               : "text-white/50 hover:text-white hover:bg-white/10"
-            }
+            }`}
           >
-            <Smartphone className="w-4 h-4" />
+            <Smartphone className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setViewport("tablet")}
             title="Tablet (768px)"
-            className={viewport === "tablet"
+            className={`h-7 w-7 sm:h-8 sm:w-8 ${viewport === "tablet"
               ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
               : "text-white/50 hover:text-white hover:bg-white/10"
-            }
+            }`}
           >
-            <MonitorSmartphone className="w-4 h-4" />
+            <MonitorSmartphone className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setViewport("desktop")}
             title="Desktop (1440px)"
-            className={viewport === "desktop"
+            className={`hidden lg:flex h-7 w-7 sm:h-8 sm:w-8 ${viewport === "desktop"
               ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
               : "text-white/50 hover:text-white hover:bg-white/10"
-            }
+            }`}
           >
-            <Monitor className="w-4 h-4" />
+            <Monitor className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </Button>
         </div>
 
-        <div className="h-6 w-px bg-white/10" />
+        <div className="hidden lg:block h-6 w-px bg-white/10" />
 
-        {/* Zoom controls */}
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
+        {/* Zoom controls - Ocultos em mobile */}
+        <div className="hidden lg:flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleZoomOut}
             title="Diminuir zoom"
             disabled={scale <= 0.5}
-            className="text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
+            className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
           <button
             onClick={handleResetZoom}
-            className="px-3 py-1 text-xs font-medium text-white/60 hover:text-white min-w-[50px] transition-colors"
+            className="px-2 py-1 text-xs font-medium text-white/60 hover:text-white min-w-[40px] transition-colors"
             title="Resetar zoom"
           >
             {Math.round(scale * 100)}%
@@ -337,7 +329,7 @@ export function IframeViewer({
             onClick={handleZoomIn}
             title="Aumentar zoom"
             disabled={scale >= 2}
-            className="text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
+            className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
@@ -348,46 +340,46 @@ export function IframeViewer({
           size="icon"
           onClick={handleRefreshIframe}
           title="Recarregar site"
-          className="text-white/50 hover:text-white hover:bg-white/10"
+          className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
         </Button>
 
-        <div className="h-6 w-px bg-white/10" />
+        <div className="hidden sm:block h-6 w-px bg-white/10" />
 
-        {/* Toggle pins visibility */}
+        {/* Toggle pins visibility - Compacto em mobile */}
         <Button
           variant={showAllPins ? "default" : "ghost"}
           size="sm"
           onClick={() => setShowAllPins(!showAllPins)}
           title={showAllPins ? "Ocultar marcacoes" : "Mostrar todas marcacoes"}
-          className={showAllPins
+          className={`h-8 sm:h-9 px-2 sm:px-3 ${showAllPins
             ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
             : "text-white/50 hover:text-white hover:bg-white/10"
-          }
+          }`}
         >
           {showAllPins ? (
             <>
-              <Eye className="w-4 h-4 mr-2" />
-              Pins Visiveis
+              <Eye className="w-3.5 sm:w-4 h-3.5 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Pins</span>
             </>
           ) : (
             <>
-              <EyeOff className="w-4 h-4 mr-2" />
-              Pins Ocultos
+              <EyeOff className="w-3.5 sm:w-4 h-3.5 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Pins</span>
             </>
           )}
         </Button>
 
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-white/40 font-mono">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <span className="hidden sm:inline text-xs sm:text-sm text-white/40 font-mono">
             {viewport === "responsive"
               ? `${Math.round(containerSize.width)}x${Math.round(containerSize.height)}`
               : `${VIEWPORT_SIZES[viewport].width}x${VIEWPORT_SIZES[viewport].height}`}
           </span>
           {feedbacks.length > 0 && (
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
-              {feedbacks.length} marcacoes
+            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              {feedbacks.length}
             </span>
           )}
         </div>
@@ -410,17 +402,17 @@ export function IframeViewer({
         </div>
       )}
 
-      {/* Iframe Container */}
+      {/* Iframe Container - Responsivo */}
       <div
         ref={wrapperRef}
-        className="flex-1 overflow-auto p-4"
+        className="flex-1 overflow-auto p-2 sm:p-4"
         style={{
           background: "radial-gradient(circle at center, rgba(168, 85, 247, 0.03) 0%, transparent 70%)",
         }}
       >
         <div
           ref={containerRef}
-          className="relative bg-white shadow-2xl shadow-black/50 transition-all duration-300 rounded-xl overflow-hidden"
+          className="relative bg-white shadow-2xl shadow-black/50 transition-all duration-300 rounded-lg sm:rounded-xl overflow-hidden"
           style={{
             width: viewport === "responsive" ? "100%" : VIEWPORT_SIZES[viewport].width,
             height: viewport === "responsive" ? "100%" : VIEWPORT_SIZES[viewport].height,

@@ -3,11 +3,10 @@ import { Feedback, Project, Comment } from '@/types';
 
 // Check if Firebase Admin is configured
 export const isFirebaseConfigured = (): boolean => {
-  return !!(
-    process.env.FIREBASE_PROJECT_ID &&
-    process.env.FIREBASE_CLIENT_EMAIL &&
-    process.env.FIREBASE_PRIVATE_KEY
-  );
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCP_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL || process.env.GCP_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY || process.env.GCP_PRIVATE_KEY;
+  return !!(projectId && clientEmail && privateKey);
 };
 
 // In-memory storage
@@ -49,6 +48,8 @@ export const mockFeedbacksApi = {
       ? Math.max(...projectFeedbacks.map((f) => f.number)) + 1
       : 1;
 
+    console.log('[mock-db] Creating feedback with audioUrl:', data.audioUrl ? 'present' : 'none');
+
     const feedback: Feedback & { id: string } = {
       ...data,
       id,
@@ -56,6 +57,8 @@ export const mockFeedbacksApi = {
       createdAt: now,
       updatedAt: now,
     };
+
+    console.log('[mock-db] Feedback created:', { id, number: nextNumber, hasAudio: !!feedback.audioUrl });
 
     mockFeedbacks.set(id, feedback);
     return { id, number: nextNumber };

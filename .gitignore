@@ -56,3 +56,6 @@ arquivo-site/
 *.json:Zone.Identifier
 *.jpg:Zone.Identifier
 *.png:Zone.Identifier
+
+# Environment files with secrets
+.env

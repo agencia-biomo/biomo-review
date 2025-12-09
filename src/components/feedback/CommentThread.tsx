@@ -100,14 +100,17 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
 
   // Load comments
   const loadComments = useCallback(async () => {
+    console.log("[CommentThread] loadComments called for feedbackId:", feedbackId);
     try {
       const response = await fetch(`/api/comments?feedbackId=${feedbackId}`);
+      console.log("[CommentThread] loadComments response status:", response.status);
       const data = await safeJsonParse(response);
+      console.log("[CommentThread] loadComments data:", data.success, "comments:", data.comments?.length);
       if (data.success) {
         setComments(data.comments || []);
       }
     } catch (error) {
-      console.error("Error loading comments:", error);
+      console.error("[CommentThread] Error loading comments:", error);
     } finally {
       setIsLoading(false);
     }
@@ -324,6 +327,8 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
 
   // Upload file to API
   const uploadFile = async (file: File): Promise<string> => {
+    console.log("[CommentThread] uploadFile called:", file.name, file.type, file.size);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", "comments");
@@ -333,7 +338,11 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
       body: formData,
     });
 
+    console.log("[CommentThread] upload response status:", response.status);
+
     const data = await safeJsonParse(response);
+    console.log("[CommentThread] upload response:", data.success ? "success" : data.error);
+
     if (data.success) {
       return data.url;
     }
@@ -343,7 +352,12 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
   // Submit new comment
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!newComment.trim() && attachments.length === 0 && !audioBlob) || isSubmitting) return;
+    console.log("[CommentThread] handleSubmit called", { newComment, attachments: attachments.length, audioBlob: !!audioBlob, isSubmitting });
+
+    if ((!newComment.trim() && attachments.length === 0 && !audioBlob) || isSubmitting) {
+      console.log("[CommentThread] Submit blocked - no content or already submitting");
+      return;
+    }
 
     setIsSubmitting(true);
     setUploadProgress(0);
@@ -353,8 +367,10 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
 
       // Upload attachments
       if (attachments.length > 0) {
+        console.log("[CommentThread] Uploading", attachments.length, "attachments");
         for (let i = 0; i < attachments.length; i++) {
           const url = await uploadFile(attachments[i]);
+          console.log("[CommentThread] Uploaded attachment", i + 1, url?.substring(0, 50));
           uploadedUrls.push(url);
           setUploadProgress(((i + 1) / attachments.length) * 100);
         }
@@ -362,12 +378,16 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
 
       // Upload audio if exists
       if (audioBlob) {
+        console.log("[CommentThread] Uploading audio blob");
         // Create a File from the Blob
         const fileName = `audio-${Date.now()}.webm`;
         const audioFile = new window.File([audioBlob], fileName, { type: "audio/webm" });
         const audioFileUrl = await uploadFile(audioFile);
+        console.log("[CommentThread] Audio uploaded:", audioFileUrl?.substring(0, 50));
         uploadedUrls.push(audioFileUrl);
       }
+
+      console.log("[CommentThread] Sending comment to API", { feedbackId, contentLength: newComment.trim().length, attachments: uploadedUrls.length });
 
       const response = await fetch("/api/comments", {
         method: "POST",
@@ -380,16 +400,22 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
         }),
       });
 
+      console.log("[CommentThread] API response status:", response.status);
       const data = await safeJsonParse(response);
+      console.log("[CommentThread] API response data:", data);
+
       if (data.success) {
         setNewComment("");
         setAttachments([]);
         setAttachmentPreviews([]);
         deleteAudio();
         await loadComments();
+      } else {
+        console.error("[CommentThread] API error:", data.error);
+        alert(`Erro: ${data.error || "Falha ao enviar comentário"}`);
       }
     } catch (error) {
-      console.error("Error submitting comment:", error);
+      console.error("[CommentThread] Error submitting comment:", error);
       alert("Erro ao enviar comentario. Tente novamente.");
     } finally {
       setIsSubmitting(false);

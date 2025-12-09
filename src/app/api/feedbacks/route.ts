@@ -21,6 +21,8 @@ export async function POST(request: NextRequest) {
       createdBy,
     } = body;
 
+    console.log('[API/feedbacks] Creating feedback with audioUrl:', audioUrl ? audioUrl.substring(0, 100) + '...' : 'none');
+
     // Validate required fields
     if (!projectId || !title || !description || !clickPosition) {
       return NextResponse.json(
@@ -80,13 +82,13 @@ export async function POST(request: NextRequest) {
       : (existingFeedbacks.docs[0].data().number || 0) + 1;
 
     const firebaseNow = new Date();
-    const feedbackData: Omit<Feedback, 'id'> = {
+
+    // Build feedback data, excluding undefined values (Firestore doesn't accept undefined)
+    const feedbackData: Record<string, unknown> = {
       projectId,
       number: nextNumber,
       title,
       description,
-      screenshot: screenshot || undefined,
-      audioUrl: audioUrl || undefined,
       attachments,
       clickPosition: clickPosition as ClickPosition,
       status: 'new',
@@ -97,11 +99,15 @@ export async function POST(request: NextRequest) {
         changedAt: firebaseNow,
       }],
       priority,
-      deadline: deadline ? new Date(deadline) : undefined,
       createdBy: createdBy || 'anonymous',
       createdAt: firebaseNow,
       updatedAt: firebaseNow,
     };
+
+    // Only add optional fields if they have values (Firestore rejects undefined)
+    if (screenshot) feedbackData.screenshot = screenshot;
+    if (audioUrl) feedbackData.audioUrl = audioUrl;
+    if (deadline) feedbackData.deadline = new Date(deadline);
 
     const docRef = await feedbacksRef.add(feedbackData);
 
@@ -163,30 +169,47 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Use Firebase
-    const adminDb = getAdminDb();
-    let query = adminDb
-      .collection('feedbacks')
-      .where('projectId', '==', projectId)
-      .orderBy('createdAt', 'desc')
-      .limit(limit);
+    // Try to use Firebase
+    try {
+      const adminDb = getAdminDb();
+      let query = adminDb
+        .collection('feedbacks')
+        .where('projectId', '==', projectId)
+        .orderBy('createdAt', 'desc')
+        .limit(limit);
 
-    if (status) {
-      query = query.where('status', '==', status);
+      if (status) {
+        query = query.where('status', '==', status);
+      }
+
+      const snapshot = await query.get();
+
+      const feedbacks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return NextResponse.json({
+        success: true,
+        feedbacks,
+        total: feedbacks.length,
+      });
+    } catch (firebaseError) {
+      // Firebase failed, fall back to mock
+      console.error('[API/feedbacks GET] Firebase failed, using mock:', firebaseError);
+      let feedbacks = await mockFeedbacksApi.getByProject(projectId);
+      if (status) {
+        feedbacks = feedbacks.filter((f) => f.status === status);
+      }
+      feedbacks = feedbacks.slice(0, limit);
+
+      return NextResponse.json({
+        success: true,
+        feedbacks,
+        total: feedbacks.length,
+        mode: 'fallback',
+      });
     }
-
-    const snapshot = await query.get();
-
-    const feedbacks = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return NextResponse.json({
-      success: true,
-      feedbacks,
-      total: feedbacks.length,
-    });
   } catch (error) {
     console.error('Error fetching feedbacks:', error);
     return NextResponse.json(

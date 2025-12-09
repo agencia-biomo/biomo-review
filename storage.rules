@@ -1,13 +1,19 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Screenshots e attachments de feedbacks
-    match /feedbacks/{feedbackId}/{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+    // Uploads gerais (audio, attachments, etc) - acesso publico leitura
+    match /uploads/{allPaths=**} {
+      allow read: if true;
+      allow write: if true; // API routes use admin SDK which bypasses rules
     }
 
-    // Avatars de usuários
+    // Screenshots e attachments de feedbacks
+    match /feedbacks/{feedbackId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Avatars de usuarios
     match /avatars/{userId}/{allPaths=**} {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == userId;

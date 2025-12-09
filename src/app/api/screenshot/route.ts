@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,19 +25,20 @@ export async function POST(request: NextRequest) {
     console.log(`[Screenshot API] Capturando com viewport: ${width}x${height}`);
     console.log(`[Screenshot API] Coordenadas recebidas: x=${x}, y=${y}, xPx=${xPx}, yPx=${yPx}`);
 
-    // Lançar navegador headless com configurações otimizadas
+    // Lançar navegador headless com chromium para serverless
     const browser = await puppeteer.launch({
-      headless: true,
       args: [
+        ...chromium.args,
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--disable-accelerated-2d-canvas",
         "--disable-gpu",
         "--disable-web-security",
-        "--disable-features=VizDisplayCompositor",
-        "--window-size=1920,1080",
       ],
+      defaultViewport: { width, height },
+      executablePath: await chromium.executablePath(),
+      headless: true,
     });
 
     const page = await browser.newPage();

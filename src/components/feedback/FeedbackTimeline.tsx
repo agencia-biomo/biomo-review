@@ -137,36 +137,36 @@ export function FeedbackTimeline({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0A0A0A] border-l border-white/10">
-      {/* Header */}
-      <div className="p-5 border-b border-white/10">
-        <div className="flex items-center justify-between mb-5">
+    <div className="flex flex-col h-full bg-[#0A0A0A] border-l-0 lg:border-l border-white/10">
+      {/* Header - Responsivo */}
+      <div className="p-3 sm:p-4 lg:p-5 border-b border-white/10">
+        <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <h2 className="font-bold text-lg text-white">Timeline</h2>
+              <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-purple-400" />
+              <h2 className="font-bold text-base sm:text-lg text-white">Alterações</h2>
             </div>
-            <p className="text-sm text-white/50">
-              {filteredFeedbacks.length} de {feedbacks.length} alteracoes
+            <p className="text-xs sm:text-sm text-white/50">
+              {filteredFeedbacks.length} de {feedbacks.length}
             </p>
           </div>
           <Button
             size="sm"
             onClick={onNewFeedback}
-            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30"
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30 text-xs sm:text-sm px-2.5 sm:px-3 h-8 sm:h-9"
           >
-            <Plus className="w-4 h-4 mr-1" />
-            Nova
+            <Plus className="w-3.5 sm:w-4 h-3.5 sm:h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Nova</span>
           </Button>
         </div>
 
-        {/* Search */}
+        {/* Search - Responsivo */}
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 sm:w-4 h-3.5 sm:h-4 text-white/40" />
             <Input
-              placeholder="Buscar por titulo ou #numero..."
-              className="pl-9 h-10 text-sm bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-500/50 focus:ring-purple-500/20 rounded-xl"
+              placeholder="Buscar..."
+              className="pl-8 sm:pl-9 h-9 sm:h-10 text-xs sm:text-sm bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-500/50 focus:ring-purple-500/20 rounded-lg sm:rounded-xl"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -174,13 +174,13 @@ export function FeedbackTimeline({
           <Button
             variant={showFilters ? "default" : "ghost"}
             size="icon"
-            className={showFilters
+            className={`h-9 sm:h-10 w-9 sm:w-10 ${showFilters
               ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
               : "text-white/50 hover:text-white hover:bg-white/10"
-            }
+            }`}
             onClick={() => setShowFilters(!showFilters)}
           >
-            <Filter className="w-4 h-4" />
+            <Filter className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </Button>
         </div>
 
@@ -373,66 +373,66 @@ export function FeedbackTimeline({
         )}
       </div>
 
-      {/* Stats Bar */}
-      <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3 text-xs bg-white/[0.02] flex-wrap">
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
+      {/* Stats Bar - Responsivo */}
+      <div className="px-3 sm:px-4 lg:px-5 py-2 sm:py-3 border-b border-white/10 flex items-center justify-between sm:justify-start gap-2 sm:gap-3 text-[10px] sm:text-xs bg-white/[0.02]">
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
           <span className="text-white/60">{statusCounts.new}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-lg shadow-yellow-500/50" />
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-yellow-500 shadow-lg shadow-yellow-500/50" />
           <span className="text-white/60">{statusCounts.in_review}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50" />
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50" />
           <span className="text-white/60">{statusCounts.in_progress}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-purple-500 shadow-lg shadow-purple-500/50" />
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-purple-500 shadow-lg shadow-purple-500/50" />
           <span className="text-white/60">{statusCounts.waiting_client}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-gray-500 shadow-lg shadow-gray-500/50" />
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-gray-500 shadow-lg shadow-gray-500/50" />
           <span className="text-white/60">{statusCounts.rejected}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-green-500 shadow-lg shadow-green-500/50" />
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-green-500 shadow-lg shadow-green-500/50" />
           <span className="text-white/60">{statusCounts.completed}</span>
         </div>
       </div>
 
-      {/* Feedback List */}
+      {/* Feedback List - Responsivo */}
       <div className="flex-1 overflow-auto">
         {filteredFeedbacks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-6">
+          <div className="flex flex-col items-center justify-center h-full text-center p-4 sm:p-6">
             {feedbacks.length === 0 ? (
               <>
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 flex items-center justify-center mb-6">
-                  <Target className="w-10 h-10 text-purple-400" />
+                <div className="w-16 sm:w-20 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 flex items-center justify-center mb-4 sm:mb-6">
+                  <Target className="w-8 sm:w-10 h-8 sm:h-10 text-purple-400" />
                 </div>
-                <p className="font-semibold text-white mb-2">
+                <p className="font-semibold text-white mb-2 text-sm sm:text-base">
                   Nenhuma alteracao ainda
                 </p>
-                <p className="text-sm text-white/50 max-w-[250px]">
+                <p className="text-xs sm:text-sm text-white/50 max-w-[220px] sm:max-w-[250px]">
                   Clique em &quot;Marcar Alteracao&quot; e depois clique em qualquer ponto do site
                 </p>
               </>
             ) : (
               <>
-                <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
-                  <Search className="w-10 h-10 text-white/30" />
+                <div className="w-16 sm:w-20 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 sm:mb-6">
+                  <Search className="w-8 sm:w-10 h-8 sm:h-10 text-white/30" />
                 </div>
-                <p className="font-semibold text-white mb-2">
+                <p className="font-semibold text-white mb-2 text-sm sm:text-base">
                   Nenhum resultado encontrado
                 </p>
-                <p className="text-sm text-white/50">
+                <p className="text-xs sm:text-sm text-white/50">
                   Tente ajustar os filtros ou busca
                 </p>
               </>
             )}
           </div>
         ) : (
-          <div className="p-3 space-y-2">
+          <div className="p-2 sm:p-3 space-y-2">
             {filteredFeedbacks.map((feedback, index) => {
               const StatusIcon = STATUS_ICONS[feedback.status as keyof typeof STATUS_ICONS] || Circle;
               const isSelected = selectedFeedback?.id === feedback.id;
@@ -441,7 +441,7 @@ export function FeedbackTimeline({
                 <div
                   key={feedback.id}
                   className={`
-                    group cursor-pointer transition-all duration-200 overflow-hidden rounded-xl
+                    group cursor-pointer transition-all duration-200 overflow-hidden rounded-lg sm:rounded-xl active:scale-[0.98]
                     ${isSelected
                       ? "bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20"
                       : "bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-purple-500/30"
@@ -450,9 +450,9 @@ export function FeedbackTimeline({
                   onClick={() => onSelectFeedback(feedback)}
                   style={{ animationDelay: `${index * 0.03}s` }}
                 >
-                  {/* Screenshot Preview */}
+                  {/* Screenshot Preview - Responsivo */}
                   {feedback.screenshot && (
-                    <div className="relative h-28 bg-neutral-900 overflow-hidden">
+                    <div className="relative h-24 sm:h-28 bg-neutral-900 overflow-hidden">
                       <img
                         src={feedback.screenshot}
                         alt="Screenshot"
@@ -462,51 +462,51 @@ export function FeedbackTimeline({
 
                       {/* Number Badge */}
                       <div
-                        className={`absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg ${STATUS_COLORS[feedback.status]}`}
+                        className={`absolute top-1.5 sm:top-2 left-1.5 sm:left-2 w-6 sm:w-7 h-6 sm:h-7 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-bold shadow-lg ${STATUS_COLORS[feedback.status]}`}
                       >
                         {feedback.number}
                       </div>
 
                       {/* Priority badge and audio indicator */}
-                      <div className="absolute top-2 right-2 flex items-center gap-1">
+                      <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 flex items-center gap-1">
                         {feedback.audioUrl && (
-                          <div className="w-6 h-6 rounded-full bg-purple-500/90 flex items-center justify-center shadow-lg" title="Audio anexado">
-                            <Mic className="w-3 h-3 text-white" />
+                          <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-purple-500/90 flex items-center justify-center shadow-lg" title="Audio anexado">
+                            <Mic className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-white" />
                           </div>
                         )}
                         <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full text-white font-medium shadow ${PRIORITY_COLORS[feedback.priority]}`}
+                          className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full text-white font-medium shadow ${PRIORITY_COLORS[feedback.priority]}`}
                         >
                           {PRIORITY_LABELS[feedback.priority]}
                         </span>
                       </div>
 
-                      {/* View indicator on hover */}
-                      <div className={`absolute bottom-2 right-2 transition-all duration-200 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                      {/* View indicator on hover/selected */}
+                      <div className={`absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2 transition-all duration-200 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                        <div className={`flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                           isSelected
                             ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg"
                             : "bg-white/90 text-black"
                         }`}>
-                          {isSelected ? "Ver detalhes" : "Ver"}
-                          <ArrowRight className="w-3 h-3" />
+                          {isSelected ? "Detalhes" : "Ver"}
+                          <ArrowRight className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Content */}
-                  <div className="p-3">
+                  {/* Content - Responsivo */}
+                  <div className="p-2.5 sm:p-3">
                     {/* No screenshot placeholder */}
                     {!feedback.screenshot && (
-                      <div className="flex items-start gap-3 mb-2">
+                      <div className="flex items-start gap-2 sm:gap-3 mb-2">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${STATUS_COLORS[feedback.status]}`}
+                          className={`w-7 sm:w-8 h-7 sm:h-8 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-bold flex-shrink-0 ${STATUS_COLORS[feedback.status]}`}
                         >
                           {feedback.number}
                         </div>
                         <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full text-white ${PRIORITY_COLORS[feedback.priority]}`}
+                          className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full text-white ${PRIORITY_COLORS[feedback.priority]}`}
                         >
                           {PRIORITY_LABELS[feedback.priority]}
                         </span>
@@ -514,32 +514,32 @@ export function FeedbackTimeline({
                     )}
 
                     {/* Title */}
-                    <h3 className="font-semibold text-sm text-white line-clamp-2 mb-1 group-hover:text-purple-300 transition-colors">
+                    <h3 className="font-semibold text-xs sm:text-sm text-white line-clamp-2 mb-1 group-hover:text-purple-300 transition-colors">
                       {feedback.title}
                     </h3>
 
-                    {/* Description Preview */}
+                    {/* Description Preview - Oculto em mobile muito pequeno */}
                     {feedback.description && (
-                      <p className="text-xs text-white/50 line-clamp-2 mb-2">
+                      <p className="hidden sm:block text-xs text-white/50 line-clamp-2 mb-2">
                         {feedback.description}
                       </p>
                     )}
 
-                    {/* Footer */}
+                    {/* Footer - Responsivo */}
                     <div className="flex items-center justify-between pt-2 border-t border-white/10">
                       {/* Status */}
-                      <div className="flex items-center gap-1.5">
-                        <StatusIcon className={`w-3 h-3 ${
+                      <div className="flex items-center gap-1 sm:gap-1.5">
+                        <StatusIcon className={`w-2.5 sm:w-3 h-2.5 sm:h-3 ${
                           feedback.status === "in_progress" ? "animate-spin" : ""
                         } ${STATUS_COLORS[feedback.status].replace("bg-", "text-")}`} />
-                        <span className="text-xs text-white/50">
+                        <span className="text-[10px] sm:text-xs text-white/50">
                           {STATUS_LABELS[feedback.status]}
                         </span>
                       </div>
 
                       {/* Time */}
-                      <div className="flex items-center gap-1 text-xs text-white/40">
-                        <Clock className="w-3 h-3" />
+                      <div className="flex items-center gap-1 text-[10px] sm:text-xs text-white/40">
+                        <Clock className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
                         <span>{formatRelativeDate(feedback.createdAt)}</span>
                       </div>
                     </div>

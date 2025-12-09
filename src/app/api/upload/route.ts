@@ -50,24 +50,32 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null;
     const folder = formData.get('folder') as string || 'uploads';
 
+    console.log('[Upload] Received file:', file?.name, 'type:', file?.type, 'size:', file?.size);
+
     if (!file) {
+      console.log('[Upload] Error: No file provided');
       return NextResponse.json(
         { error: 'No file provided' },
         { status: 400 }
       );
     }
 
-    // Validate file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      // Allow files without specific type but with known extensions
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      const allowedExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', '7z', 'webm', 'mp3', 'wav', 'mp4'];
-      if (!ext || !allowedExts.includes(ext)) {
-        return NextResponse.json(
-          { error: `Tipo de arquivo nao permitido: ${file.type || 'desconhecido'}` },
-          { status: 400 }
-        );
-      }
+    // Validate file type - be more permissive for audio blobs from MediaRecorder
+    const fileType = file.type || '';
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const allowedExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', '7z', 'webm', 'mp3', 'wav', 'mp4', 'ogg', 'm4a', 'jpeg', 'jpg', 'png', 'gif', 'pdf'];
+
+    // Check if type is allowed OR extension is allowed OR it's an audio/video type (for MediaRecorder blobs)
+    const isTypeAllowed = ALLOWED_TYPES.includes(fileType);
+    const isExtAllowed = allowedExts.includes(ext);
+    const isMediaType = fileType.startsWith('audio/') || fileType.startsWith('video/') || fileType.startsWith('image/');
+
+    if (!isTypeAllowed && !isExtAllowed && !isMediaType) {
+      console.log('[Upload] Error: File type not allowed:', fileType, 'ext:', ext);
+      return NextResponse.json(
+        { error: `Tipo de arquivo nao permitido: ${fileType || 'desconhecido'}` },
+        { status: 400 }
+      );
     }
 
     // Validate file size (max 30MB)
@@ -78,13 +86,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If Firebase not configured, return mock URL
-    if (!isFirebaseConfigured()) {
-      // Convert to base64 for demo mode
-      const bytes = await file.arrayBuffer();
-      const base64 = Buffer.from(bytes).toString('base64');
-      const dataUrl = `data:${file.type || 'application/octet-stream'};base64,${base64}`;
+    // Convert file to buffer first (needed for both paths)
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
 
+    // Helper function to return base64 URL (fallback)
+    const returnBase64 = () => {
+      const base64 = buffer.toString('base64');
+      const dataUrl = `data:${file.type || 'application/octet-stream'};base64,${base64}`;
       return NextResponse.json({
         success: true,
         url: dataUrl,
@@ -93,51 +102,62 @@ export async function POST(request: NextRequest) {
         type: file.type,
         mode: 'demo',
       });
+    };
+
+    // If Firebase not configured, return base64 URL
+    if (!isFirebaseConfigured()) {
+      console.log('[Upload] Firebase not configured, using base64 fallback');
+      return returnBase64();
     }
 
-    // Upload to Firebase Storage
-    const adminApp = getAdminApp();
-    const storage = getStorage(adminApp);
-    const bucket = storage.bucket();
+    // Try to upload to Firebase Storage
+    try {
+      const adminApp = getAdminApp();
+      const storage = getStorage(adminApp);
+      // Explicitly specify bucket name to avoid default bucket issues
+      const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'alteracoes-biomo.firebasestorage.app';
+      const bucket = storage.bucket(bucketName);
 
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 8);
-    const ext = file.name.split('.').pop();
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `${folder}/${timestamp}-${randomStr}-${sanitizedName}`;
+      // Generate unique filename
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 8);
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filename = `${folder}/${timestamp}-${randomStr}-${sanitizedName}`;
 
-    // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Upload file
-    const fileRef = bucket.file(filename);
-    await fileRef.save(buffer, {
-      metadata: {
-        contentType: file.type || 'application/octet-stream',
+      // Upload file
+      const fileRef = bucket.file(filename);
+      await fileRef.save(buffer, {
         metadata: {
-          originalName: file.name,
-          uploadedAt: new Date().toISOString(),
+          contentType: file.type || 'application/octet-stream',
+          metadata: {
+            originalName: file.name,
+            uploadedAt: new Date().toISOString(),
+          },
         },
-      },
-    });
+      });
 
-    // Make file publicly accessible
-    await fileRef.makePublic();
+      // Make file publicly accessible
+      await fileRef.makePublic();
 
-    // Get public URL
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+      // Get public URL
+      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
 
-    return NextResponse.json({
-      success: true,
-      url: publicUrl,
-      filename: file.name,
-      size: file.size,
-      type: file.type,
-    });
+      console.log('[Upload] File uploaded to Firebase Storage:', publicUrl);
+
+      return NextResponse.json({
+        success: true,
+        url: publicUrl,
+        filename: file.name,
+        size: file.size,
+        type: file.type,
+      });
+    } catch (storageError) {
+      // Firebase Storage failed, fall back to base64
+      console.error('[Upload] Firebase Storage failed, using base64 fallback:', storageError);
+      return returnBase64();
+    }
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error('[Upload] Error processing file:', error);
     return NextResponse.json(
       { error: 'Erro ao fazer upload', details: String(error) },
       { status: 500 }
@@ -145,10 +165,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Configure Next.js to handle large files
-export const config = {
-  api: {
-    bodyParser: false,
-    responseLimit: '35mb',
-  },
-};
+// Dynamic to ensure always fresh (not cached)
+export const dynamic = 'force-dynamic';
+
+// Allow larger request bodies (35MB)
+export const maxDuration = 60; // seconds timeout

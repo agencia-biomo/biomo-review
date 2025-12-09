@@ -72,6 +72,16 @@ export default function PublicProjectPage({ params }: PageProps) {
     loadData();
   }, [loadData]);
 
+  // Keep selectedFeedback in sync with feedbacks list (e.g. after status update)
+  useEffect(() => {
+    if (selectedFeedback && feedbacks.length > 0) {
+      const updated = feedbacks.find((f) => f.id === selectedFeedback.id);
+      if (updated && JSON.stringify(updated) !== JSON.stringify(selectedFeedback)) {
+        setSelectedFeedback(updated);
+      }
+    }
+  }, [feedbacks, selectedFeedback]);
+
   // Handle creating a new feedback
   const handleCreateFeedback = (clickPosition: ClickPosition, screenshot: string) => {
     setPendingClickPosition(clickPosition);

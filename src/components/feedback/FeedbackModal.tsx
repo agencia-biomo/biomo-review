@@ -159,6 +159,8 @@ export function FeedbackModal({
       const audioFile = new window.File([audioBlob], fileName, { type: "audio/webm" });
       formData.append("file", audioFile);
 
+      console.log("[FeedbackModal] Uploading audio file:", fileName, "size:", audioBlob.size);
+
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -166,18 +168,23 @@ export function FeedbackModal({
 
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("[FeedbackModal] Upload returned non-JSON:", text.substring(0, 200));
         throw new Error("Upload failed - server returned invalid response");
       }
 
       const result = await response.json();
+      console.log("[FeedbackModal] Upload result:", result);
 
       if (result.success) {
+        console.log("[FeedbackModal] Audio uploaded successfully:", result.url?.substring(0, 100));
         return result.url;
       } else {
         throw new Error(result.error || "Upload failed");
       }
     } catch (error) {
-      console.error("Error uploading audio:", error);
+      console.error("[FeedbackModal] Error uploading audio:", error);
+      alert("Erro ao fazer upload do audio. O feedback sera criado sem audio.");
       return undefined;
     } finally {
       setIsUploading(false);
@@ -221,31 +228,31 @@ export function FeedbackModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-auto m-4 bg-[#0A0A0A] rounded-2xl border border-white/10 shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-              <Target className="w-5 h-5 text-white" />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-auto sm:m-4 bg-[#0A0A0A] rounded-t-2xl sm:rounded-2xl border border-white/10 shadow-2xl">
+        {/* Header - Responsivo */}
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 sticky top-0 bg-[#0A0A0A] z-10">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <Target className="w-4 sm:w-5 h-4 sm:h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-lg text-white">Nova Solicitacao</h2>
-              <p className="text-sm text-white/50">Descreva a alteracao desejada</p>
+              <h2 className="font-bold text-base sm:text-lg text-white">Nova Solicitacao</h2>
+              <p className="text-xs sm:text-sm text-white/50">Descreva a alteracao</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-white/50 hover:text-white hover:bg-white/10 rounded-xl"
+            className="text-white/50 hover:text-white hover:bg-white/10 rounded-lg sm:rounded-xl h-8 w-8 sm:h-10 sm:w-10"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 sm:w-5 h-4 sm:h-5" />
           </Button>
         </div>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-5">
+        {/* Content - Responsivo */}
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 sm:space-y-5">
           {/* Screenshot Preview */}
           <div>
             <Label className="text-sm font-medium text-white mb-3 flex items-center gap-2">
@@ -387,17 +394,17 @@ export function FeedbackModal({
             </div>
           </div>
 
-          {/* Priority */}
+          {/* Priority - Responsivo */}
           <div>
-            <Label className="text-sm font-medium text-white mb-3 block">Prioridade</Label>
-            <div className="flex gap-2">
+            <Label className="text-xs sm:text-sm font-medium text-white mb-2 sm:mb-3 block">Prioridade</Label>
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
               {(Object.keys(PRIORITY_LABELS) as FeedbackPriority[]).map((p) => (
                 <button
                   key={p}
                   type="button"
                   onClick={() => setPriority(p)}
                   className={`
-                    flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border
+                    px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-medium transition-all border
                     ${priority === p
                       ? `${PRIORITY_COLORS[p]} text-white border-transparent shadow-lg`
                       : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
@@ -410,29 +417,29 @@ export function FeedbackModal({
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+          {/* Actions - Responsivo */}
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0A0A0A] pb-safe">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="text-white/60 hover:text-white hover:bg-white/10"
+              className="text-white/60 hover:text-white hover:bg-white/10 h-10 sm:h-auto"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || isUploading || !title.trim() || !description.trim()}
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30 disabled:opacity-50"
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30 disabled:opacity-50 h-11 sm:h-auto"
             >
               {isSubmitting || isUploading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isUploading ? "Enviando audio..." : "Enviando..."}
+                  <span className="text-sm">{isUploading ? "Enviando..." : "Enviando..."}</span>
                 </>
               ) : (
                 <>
-                  Enviar Solicitacao
+                  <span className="text-sm">Enviar</span>
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}

@@ -48,7 +48,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-72 h-screen bg-[#0A0A0A] flex flex-col relative overflow-hidden">
+    <aside className="hidden lg:flex w-72 h-screen bg-[#0A0A0A] flex-col relative overflow-hidden">
       {/* Background Gradient Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
