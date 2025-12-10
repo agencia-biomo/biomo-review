@@ -470,3 +470,267 @@ html.dark .glass {
 .draggable-item:active {
   cursor: grabbing;
 }
+
+/* ==============================================
+   PREMIUM PROJECT CARD ANIMATIONS
+   ============================================== */
+
+/* Floating Orbs Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(30px, -20px) scale(1.1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(60px, 10px) scale(0.9);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(20px, 30px) scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+/* Border Flow Animation */
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-border-flow {
+  background-size: 200% 200%;
+  animation: border-flow 3s ease infinite;
+}
+
+/* Grid Move Animation */
+@keyframes grid-move {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(40px, 40px);
+  }
+}
+
+/* Spotlight Pulse */
+@keyframes spotlight-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Gradient Rotate for backgrounds */
+@keyframes gradient-rotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Aurora Effect */
+@keyframes aurora {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+    opacity: 0.5;
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+    opacity: 0.4;
+  }
+}
+
+.animate-aurora {
+  animation: aurora 15s ease-in-out infinite;
+}
+
+/* Glow Pulse for status indicators */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Scale Bounce for icons */
+@keyframes scale-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.group:hover .animate-scale-bounce {
+  animation: scale-bounce 0.6s ease-in-out;
+}
+
+/* Progress Ring Animation */
+@keyframes progress-fill {
+  from {
+    stroke-dashoffset: 251.2;
+  }
+}
+
+.animate-progress-fill {
+  animation: progress-fill 1s ease-out forwards;
+}
+
+/* Shimmer Loading Effect */
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer-slide {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shimmer-slide 2s infinite;
+}
+
+/* Noise Grain Overlay */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* 3D Card Perspective Container */
+.perspective-container {
+  perspective: 1000px;
+}
+
+/* Ripple Effect on Click */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.3);
+  pointer-events: none;
+  animation: ripple 0.6s ease-out;
+}
+
+/* Morphing Gradient Background */
+@keyframes morph-gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    background-position: 50% 100%;
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: hue-rotate(15deg);
+  }
+  75% {
+    background-position: 50% 0%;
+  }
+}
+
+.animate-morph-gradient {
+  background: linear-gradient(
+    -45deg,
+    #a855f7,
+    #6366f1,
+    #8b5cf6,
+    #7c3aed
+  );
+  background-size: 400% 400%;
+  animation: morph-gradient 10s ease infinite;
+}
+
+/* Hover lift effect */
+@keyframes hover-lift {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(168, 85, 247, 0.2);
+  }
+}
+
+/* Subtle breathing animation for idle state */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
