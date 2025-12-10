@@ -85,9 +85,29 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Dark Theme */
+/* Dark Theme - Class based */
+.dark,
+html.dark {
+  --background: #09090B;
+  --foreground: #FAFAFA;
+  --card: #18181B;
+  --card-foreground: #FAFAFA;
+  --popover: #18181B;
+  --popover-foreground: #FAFAFA;
+  --border: #27272A;
+  --input: #27272A;
+  --accent: #27272A;
+  --accent-foreground: #FAFAFA;
+  --muted: #71717A;
+  --muted-foreground: #A1A1AA;
+  --primary: #A855F7;
+  --primary-dark: #9333EA;
+  --primary-light: #C084FC;
+}
+
+/* Dark Theme - Media Query fallback */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #09090B;
     --foreground: #FAFAFA;
     --card: #18181B;
@@ -204,8 +224,13 @@ body {
   -webkit-backdrop-filter: blur(12px);
 }
 
+.dark .glass,
+html.dark .glass {
+  background: rgba(24, 24, 27, 0.8);
+}
+
 @media (prefers-color-scheme: dark) {
-  .glass {
+  :root:not(.light) .glass {
     background: rgba(24, 24, 27, 0.8);
   }
 }

@@ -18,6 +18,7 @@ import {
   Users,
   BarChart3,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -176,6 +177,7 @@ export function Sidebar() {
             <Bell className="w-4 h-4" />
             <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-purple-500" />
           </Button>
+          <ThemeToggle />
         </div>
 
         {/* User Menu */}
