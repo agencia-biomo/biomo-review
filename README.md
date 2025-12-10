@@ -2,10 +2,12 @@
 
 Sistema de feedback visual para alteracoes de sites. Permite que clientes e equipes colaborem de forma eficiente na revisao de alteracoes em projetos web.
 
+![Version](https://img.shields.io/badge/version-1.0.0-green?style=flat-square)
 ![Next.js](https://img.shields.io/badge/Next.js-15.1-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css)
 ![Firebase](https://img.shields.io/badge/Firebase-11.0-FFCA28?style=flat-square&logo=firebase)
+![Tests](https://img.shields.io/badge/tests-50%20passed-success?style=flat-square)
 
 ## Funcionalidades
 
@@ -45,6 +47,36 @@ Sistema de feedback visual para alteracoes de sites. Permite que clientes e equi
 - Gravacao de audio nos comentarios
 - Mencoes e notificacoes
 
+### v1.0.0 - Premium Features
+
+#### UX Aprimorada
+- **Toast Notifications**: Sistema de notificacoes elegante (substitui alerts)
+- **Skeleton Loading**: Loading states animados em todas as paginas
+- **Command Palette**: Acesso rapido via `Ctrl/Cmd + K`
+- **Floating Action Button**: Acoes rapidas sempre visiveis
+- **Onboarding Tour**: Tour guiado para novos usuarios
+- **Feedback Templates**: Templates prontos (Bug, Texto, Layout, Feature)
+
+#### Visualizacoes
+- **Kanban Board**: Visualizacao em quadro dos feedbacks
+- **Analytics Dashboard**: Graficos e metricas detalhadas
+
+#### Integracoes
+- **Sentry**: Rastreamento de erros em producao
+- **Slack Webhooks**: Notificacoes no Slack
+- **Custom Webhooks**: Integre com qualquer sistema
+
+#### Acessibilidade (WCAG 2.1)
+- Skip navigation link
+- ARIA labels e roles
+- Navegacao por teclado
+- Suporte a reduced motion
+
+#### PWA
+- Indicador de modo offline
+- Prompt de atualizacao
+- Instalavel como app
+
 ## Tecnologias
 
 - **Frontend**: Next.js 15, React 19, TypeScript
@@ -53,7 +85,9 @@ Sistema de feedback visual para alteracoes de sites. Permite que clientes e equi
 - **Banco de Dados**: Firebase Firestore
 - **Storage**: Firebase Storage
 - **Autenticacao**: NextAuth.js
-- **Testes**: Playwright
+- **Graficos**: Recharts
+- **Monitoramento**: Sentry
+- **Testes**: Playwright (50 testes E2E)
 
 ## Instalacao
 
@@ -126,8 +160,15 @@ npm run build            # Build de producao
 npm run start            # Inicia servidor de producao
 
 # Testes
-npm run test:e2e         # Testes E2E com Playwright
-npm run test:visual      # Testes visuais
+npm run test:e2e         # Testes E2E com Playwright (local)
+TEST_PROD=true npx playwright test  # Testes em producao
+npx playwright test --project=chromium  # Apenas desktop
+npx playwright test --project=mobile    # Apenas mobile
+npx playwright show-report              # Ver relatorio HTML
+
+# Utilitarios
+node scripts/cleanup-test-data.js       # Limpa dados de teste (local)
+TEST_PROD=true node scripts/cleanup-test-data.js  # Limpa em producao
 
 # Linting
 npm run lint             # Executa ESLint
