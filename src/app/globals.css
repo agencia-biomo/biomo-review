@@ -422,3 +422,51 @@ html.dark .glass {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Drag and Drop Styles */
+[data-dragging="true"] {
+  opacity: 0.5 !important;
+  cursor: grabbing !important;
+}
+
+[data-drag-over="true"] {
+  position: relative;
+}
+
+[data-drag-over="true"][data-drag-position="before"]::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #a855f7, #6366f1);
+  border-radius: 2px;
+  z-index: 10;
+}
+
+[data-drag-over="true"][data-drag-position="after"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #a855f7, #6366f1);
+  border-radius: 2px;
+  z-index: 10;
+}
+
+.draggable-item {
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.draggable-item:hover {
+  transform: translateY(-1px);
+}
+
+.draggable-item:active {
+  cursor: grabbing;
+}
