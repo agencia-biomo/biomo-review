@@ -10,7 +10,9 @@ import { FeedbackDetailModal } from "@/components/feedback/FeedbackDetailModal";
 import { Feedback, ClickPosition, Project } from "@/types";
 import { Button } from "@/components/ui/button";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { ArrowLeft, Link2, ExternalLink, Sparkles, CheckCircle2, Monitor, ListTodo } from "lucide-react";
+import { ArrowLeft, Link2, ExternalLink, Sparkles, CheckCircle2, Monitor, ListTodo, Keyboard } from "lucide-react";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { KeyboardShortcutsHelp } from "@/components/ui/KeyboardShortcutsHelp";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -182,6 +184,71 @@ export default function ProjectViewerPage({ params }: PageProps) {
     }
   };
 
+  // Keyboard shortcuts
+  const shortcuts = [
+    {
+      key: "ArrowUp",
+      description: "Feedback anterior",
+      action: () => {
+        if (feedbacks.length === 0) return;
+        const currentIndex = selectedFeedback
+          ? feedbacks.findIndex(f => f.id === selectedFeedback.id)
+          : -1;
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : feedbacks.length - 1;
+        setSelectedFeedback(feedbacks[newIndex]);
+      },
+    },
+    {
+      key: "ArrowDown",
+      description: "Próximo feedback",
+      action: () => {
+        if (feedbacks.length === 0) return;
+        const currentIndex = selectedFeedback
+          ? feedbacks.findIndex(f => f.id === selectedFeedback.id)
+          : -1;
+        const newIndex = currentIndex < feedbacks.length - 1 ? currentIndex + 1 : 0;
+        setSelectedFeedback(feedbacks[newIndex]);
+      },
+    },
+    {
+      key: "Enter",
+      description: "Abrir feedback selecionado",
+      action: () => {
+        if (selectedFeedback) {
+          setIsDetailModalOpen(true);
+        }
+      },
+    },
+    {
+      key: "Escape",
+      description: "Fechar modal",
+      action: () => {
+        if (isDetailModalOpen) {
+          setIsDetailModalOpen(false);
+          setSelectedFeedback(null);
+        } else if (isModalOpen) {
+          setIsModalOpen(false);
+          setPendingClickPosition(null);
+          setPendingScreenshot(null);
+        }
+      },
+    },
+    {
+      key: "n",
+      description: "Novo feedback",
+      action: handleNewFeedback,
+    },
+    {
+      key: "l",
+      description: "Copiar link para cliente",
+      action: handleCopyLink,
+    },
+  ];
+
+  const { showHelp, setShowHelp } = useKeyboardShortcuts(shortcuts, {
+    enabled: !isModalOpen,
+  });
+
   if (isLoading) {
     return (
       <div className="h-screen bg-[#09090B] flex items-center justify-center">
@@ -258,6 +325,16 @@ export default function ProjectViewerPage({ params }: PageProps) {
               {feedbacks.length}
             </span>
           </div>
+          {/* Botão de Atalhos - apenas desktop */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowHelp(true)}
+            className="hidden lg:flex text-white/50 hover:text-white hover:bg-white/10 p-2"
+            title="Atalhos de teclado (?)"
+          >
+            <Keyboard className="w-4 h-4" />
+          </Button>
           <NotificationDropdown userId="admin" />
           <Button
             variant="outline"
@@ -389,6 +466,13 @@ export default function ProjectViewerPage({ params }: PageProps) {
           canChangeStatus={true}
         />
       )}
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsHelp
+        shortcuts={shortcuts}
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+      />
     </div>
   );
 }
