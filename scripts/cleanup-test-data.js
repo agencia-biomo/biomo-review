@@ -12,11 +12,16 @@ const BASE_URL = process.env.TEST_PROD
 // Padrões de nomes de projetos de teste
 const TEST_PATTERNS = [
   /^View\d+/,           // View123456, View123456B, View123456C
+  /^Viewer \d+/,        // Viewer 1765361708862-3
   /^E2E \d+/,           // E2E 1234567890
   /^Busca \d+/,         // Busca 1234567890
   /^Cliente Teste/,     // Cliente Teste E2E
   /^Projeto Busca/,     // Projeto Busca Teste
   /^Projeto Viewer/,    // Projeto Viewer Teste
+  /^Projeto Para Busca/,// Projeto Para Busca
+  /^Projeto API Teste/, // Projeto API Teste
+  /^Projeto Atualizado/,// Projeto Atualizado
+  /^Projeto Feedback/,  // Projeto Feedback Teste
   /^Test\d+/,           // Test123456
   /^Teste API/,         // Teste API
 ];
