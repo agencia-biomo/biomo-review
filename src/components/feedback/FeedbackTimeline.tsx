@@ -19,11 +19,13 @@ import {
   Calendar,
   UserPlus,
   SortAsc,
-  SortDesc,
   X,
   Hourglass,
   XCircle,
   Mic,
+  Download,
+  FileText,
+  CalendarDays,
 } from "lucide-react";
 import { formatRelativeDate } from "@/lib/date-utils";
 
@@ -37,6 +39,7 @@ interface FeedbackTimelineProps {
 type FilterStatus = "all" | "new" | "in_review" | "in_progress" | "waiting_client" | "rejected" | "completed";
 type FilterPriority = "all" | FeedbackPriority;
 type SortBy = "newest" | "oldest" | "priority" | "deadline";
+type DateRange = "all" | "today" | "week" | "month" | "custom";
 
 const STATUS_ICONS = {
   new: Circle,
@@ -65,15 +68,148 @@ export function FeedbackTimeline({
   const [filterPriority, setFilterPriority] = useState<FilterPriority>("all");
   const [filterAssigned, setFilterAssigned] = useState<string>("all");
   const [filterHasDeadline, setFilterHasDeadline] = useState<boolean | null>(null);
+  const [filterDateRange, setFilterDateRange] = useState<DateRange>("all");
+  const [customDateFrom, setCustomDateFrom] = useState<string>("");
+  const [customDateTo, setCustomDateTo] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortBy>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Get unique assignees
   const assignees = [...new Set(feedbacks.filter(f => f.assignedTo).map(f => f.assignedTo!))];
 
   // Check if any advanced filter is active
-  const hasAdvancedFilters = filterPriority !== "all" || filterAssigned !== "all" || filterHasDeadline !== null;
+  const hasAdvancedFilters = filterPriority !== "all" || filterAssigned !== "all" || filterHasDeadline !== null || filterDateRange !== "all";
+
+  // Export functions
+  const exportToCSV = () => {
+    const headers = ["#", "Título", "Status", "Prioridade", "Responsável", "Prazo", "Criado em"];
+    const rows = filteredFeedbacks.map(f => [
+      f.number,
+      f.title.replace(/"/g, '""'),
+      STATUS_LABELS[f.status],
+      PRIORITY_LABELS[f.priority],
+      f.assignedTo || "Não atribuído",
+      f.deadline ? new Date(f.deadline).toLocaleDateString("pt-BR") : "-",
+      formatRelativeDate(f.createdAt)
+    ]);
+
+    const csv = [headers.join(","), ...rows.map(r => r.map(c => `"${c}"`).join(","))].join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `feedbacks-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setShowExportMenu(false);
+  };
+
+  const exportToPDF = () => {
+    // Create printable HTML
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Relatório de Feedbacks</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #333; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+          th { background-color: #7c3aed; color: white; }
+          tr:nth-child(even) { background-color: #f9f9f9; }
+          .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+          .date { color: #666; font-size: 14px; }
+          .summary { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+          .summary span { margin-right: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Relatório de Feedbacks</h1>
+          <span class="date">Gerado em: ${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+        </div>
+        <div class="summary">
+          <strong>Resumo:</strong>
+          <span>Total: ${filteredFeedbacks.length}</span>
+          <span>Novos: ${filteredFeedbacks.filter(f => f.status === "new").length}</span>
+          <span>Em Progresso: ${filteredFeedbacks.filter(f => f.status === "in_progress").length}</span>
+          <span>Concluídos: ${filteredFeedbacks.filter(f => f.status === "completed").length}</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Prioridade</th>
+              <th>Responsável</th>
+              <th>Prazo</th>
+              <th>Criado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredFeedbacks.map(f => `
+              <tr>
+                <td>${f.number}</td>
+                <td>${f.title}</td>
+                <td>${STATUS_LABELS[f.status]}</td>
+                <td>${PRIORITY_LABELS[f.priority]}</td>
+                <td>${f.assignedTo || "Não atribuído"}</td>
+                <td>${f.deadline ? new Date(f.deadline).toLocaleDateString("pt-BR") : "-"}</td>
+                <td>${formatRelativeDate(f.createdAt)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+    setShowExportMenu(false);
+  };
+
+  // Parse date helper
+  const parseDate = (date: Date | string | { seconds?: number; _seconds?: number } | undefined): Date => {
+    if (!date) return new Date(0);
+    if (date instanceof Date) return date;
+    if (typeof date === "string") return new Date(date);
+    if (typeof date === "object") {
+      const seconds = "seconds" in date ? date.seconds : "_seconds" in date ? date._seconds : 0;
+      return new Date((seconds || 0) * 1000);
+    }
+    return new Date(0);
+  };
+
+  // Get date range boundaries
+  const getDateRangeBoundaries = (): { from: Date; to: Date } | null => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (filterDateRange) {
+      case "today":
+        return { from: today, to: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
+      case "week":
+        return { from: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000), to: now };
+      case "month":
+        return { from: new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000), to: now };
+      case "custom":
+        if (customDateFrom && customDateTo) {
+          return { from: new Date(customDateFrom), to: new Date(customDateTo + "T23:59:59") };
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
 
   // Filter feedbacks
   const filteredFeedbacks = feedbacks
@@ -98,7 +234,12 @@ export function FeedbackTimeline({
         filterHasDeadline === null ||
         (filterHasDeadline ? !!feedback.deadline : !feedback.deadline);
 
-      return matchesSearch && matchesStatus && matchesPriority && matchesAssigned && matchesDeadline;
+      // Date range filter
+      const dateRange = getDateRangeBoundaries();
+      const feedbackDate = parseDate(feedback.createdAt);
+      const matchesDateRange = !dateRange || (feedbackDate >= dateRange.from && feedbackDate <= dateRange.to);
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesAssigned && matchesDeadline && matchesDateRange;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -122,6 +263,9 @@ export function FeedbackTimeline({
     setFilterPriority("all");
     setFilterAssigned("all");
     setFilterHasDeadline(null);
+    setFilterDateRange("all");
+    setCustomDateFrom("");
+    setCustomDateTo("");
     setSearchQuery("");
     setSortBy("newest");
   };
@@ -150,14 +294,53 @@ export function FeedbackTimeline({
               {filteredFeedbacks.length} de {feedbacks.length}
             </p>
           </div>
-          <Button
-            size="sm"
-            onClick={onNewFeedback}
-            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30 text-xs sm:text-sm px-2.5 sm:px-3 h-8 sm:h-9"
-          >
-            <Plus className="w-3.5 sm:w-4 h-3.5 sm:h-4 sm:mr-1" />
-            <span className="hidden sm:inline">Nova</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Export Menu */}
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="text-white/50 hover:text-white hover:bg-white/10 text-xs sm:text-sm px-2.5 sm:px-3 h-8 sm:h-9"
+                title="Exportar"
+              >
+                <Download className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+              </Button>
+              {showExportMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowExportMenu(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-1 w-40 bg-[#18181B] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden animate-fade-in">
+                    <button
+                      onClick={exportToCSV}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Exportar CSV
+                    </button>
+                    <button
+                      onClick={exportToPDF}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Exportar PDF
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <Button
+              size="sm"
+              onClick={onNewFeedback}
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30 text-xs sm:text-sm px-2.5 sm:px-3 h-8 sm:h-9"
+            >
+              <Plus className="w-3.5 sm:w-4 h-3.5 sm:h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Nova</span>
+            </Button>
+          </div>
         </div>
 
         {/* Search - Responsivo */}
@@ -327,6 +510,57 @@ export function FeedbackTimeline({
                       Sem prazo
                     </button>
                   </div>
+                </div>
+
+                {/* Date Range filter */}
+                <div>
+                  <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                    <CalendarDays className="w-3 h-3" />
+                    Período
+                  </label>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {([
+                      { value: "all", label: "Todo período" },
+                      { value: "today", label: "Hoje" },
+                      { value: "week", label: "7 dias" },
+                      { value: "month", label: "30 dias" },
+                      { value: "custom", label: "Personalizado" },
+                    ] as { value: DateRange; label: string }[]).map((d) => (
+                      <button
+                        key={d.value}
+                        onClick={() => setFilterDateRange(d.value)}
+                        className={`px-2 py-1 rounded text-[10px] transition-all ${
+                          filterDateRange === d.value
+                            ? "bg-indigo-500 text-white"
+                            : "bg-white/5 text-white/50 hover:bg-white/10"
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+                  {filterDateRange === "custom" && (
+                    <div className="flex gap-2 mt-2">
+                      <div className="flex-1">
+                        <label className="text-[9px] text-white/30 block mb-1">De</label>
+                        <input
+                          type="date"
+                          value={customDateFrom}
+                          onChange={(e) => setCustomDateFrom(e.target.value)}
+                          className="w-full h-7 px-2 rounded bg-white/5 border border-white/10 text-white text-[10px] focus:outline-none focus:border-purple-500/50"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[9px] text-white/30 block mb-1">Até</label>
+                        <input
+                          type="date"
+                          value={customDateTo}
+                          onChange={(e) => setCustomDateTo(e.target.value)}
+                          className="w-full h-7 px-2 rounded bg-white/5 border border-white/10 text-white text-[10px] focus:outline-none focus:border-purple-500/50"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Sort */}
