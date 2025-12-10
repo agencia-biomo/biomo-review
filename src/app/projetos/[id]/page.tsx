@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { IframeViewer } from "@/components/project/IframeViewer";
 import { FeedbackTimeline } from "@/components/feedback/FeedbackTimeline";
 import { FeedbackModal, FeedbackFormData } from "@/components/feedback/FeedbackModal";
@@ -10,9 +11,11 @@ import { FeedbackDetailModal } from "@/components/feedback/FeedbackDetailModal";
 import { Feedback, ClickPosition, Project } from "@/types";
 import { Button } from "@/components/ui/button";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { ArrowLeft, Link2, ExternalLink, Sparkles, CheckCircle2, Monitor, ListTodo, Keyboard } from "lucide-react";
+import { ArrowLeft, Link2, ExternalLink, Sparkles, CheckCircle2, Monitor, ListTodo, Keyboard, LayoutGrid } from "lucide-react";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "@/components/ui/KeyboardShortcutsHelp";
+import { toast } from "@/hooks/useToast";
+import { ProjectPageSkeleton } from "@/components/skeletons";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -168,7 +171,7 @@ export default function ProjectViewerPage({ params }: PageProps) {
   };
 
   const handleNewFeedback = () => {
-    alert('Clique em "Marcar Alteracao" e depois clique em qualquer ponto do site para criar uma solicitacao.');
+    toast.info("Como marcar alteração", 'Clique em "Marcar Alteração" e depois clique em qualquer ponto do site');
   };
 
   const handleCopyLink = async () => {
@@ -250,14 +253,7 @@ export default function ProjectViewerPage({ params }: PageProps) {
   });
 
   if (isLoading) {
-    return (
-      <div className="h-screen bg-[#09090B] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin mx-auto mb-4" />
-          <p className="text-sm text-white/50">Carregando projeto...</p>
-        </div>
-      </div>
-    );
+    return <ProjectPageSkeleton />;
   }
 
   if (error || !project) {
@@ -325,6 +321,27 @@ export default function ProjectViewerPage({ params }: PageProps) {
               {feedbacks.length}
             </span>
           </div>
+
+          {/* Toggle Vista: Timeline/Kanban */}
+          <div className="hidden sm:flex items-center bg-white/5 rounded-lg p-0.5 border border-white/10">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 bg-white/10 text-white"
+            >
+              <ListTodo className="w-4 h-4" />
+            </Button>
+            <Link href={`/projetos/${projectId}/kanban`}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-white/50 hover:text-white"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+
           {/* Botão de Atalhos - apenas desktop */}
           <Button
             variant="ghost"

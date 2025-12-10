@@ -7,6 +7,8 @@ import { FeedbackModal, FeedbackFormData } from "@/components/feedback/FeedbackM
 import { FeedbackDetailModal } from "@/components/feedback/FeedbackDetailModal";
 import { Feedback, ClickPosition, Project } from "@/types";
 import { ExternalLink, AlertCircle } from "lucide-react";
+import { toast } from "@/hooks/useToast";
+import { ProjectPageSkeleton } from "@/components/skeletons";
 
 interface PageProps {
   params: Promise<{ token: string }>;
@@ -125,18 +127,11 @@ export default function PublicProjectPage({ params }: PageProps) {
 
   // Handle clicking "New" button in timeline
   const handleNewFeedback = () => {
-    alert('Clique em "Marcar Alteracao" e depois clique em qualquer ponto do site para criar uma solicitacao.');
+    toast.info("Como marcar alteração", 'Clique em "Marcar Alteração" e depois clique em qualquer ponto do site');
   };
 
   if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Carregando projeto...</p>
-        </div>
-      </div>
-    );
+    return <ProjectPageSkeleton />;
   }
 
   if (error || !project) {

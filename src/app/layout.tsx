@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ServiceWorkerProvider } from "@/components/providers/ServiceWorkerProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { CommandPaletteProvider } from "@/components/providers/CommandPaletteProvider";
+import { Toaster } from "@/components/ui/toaster";
+import { SkipLink } from "@/components/a11y";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,9 +56,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="dark">
+          <SkipLink />
           <ServiceWorkerProvider>
-            <SessionProvider>{children}</SessionProvider>
+            <SessionProvider>
+              <CommandPaletteProvider>
+                {children}
+              </CommandPaletteProvider>
+            </SessionProvider>
           </ServiceWorkerProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

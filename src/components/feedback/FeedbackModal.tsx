@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ClickPosition, FeedbackPriority, PRIORITY_LABELS, PRIORITY_COLORS } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { X, Loader2, Target, Sparkles, MapPin, ArrowRight, Mic, Square, Trash2, Play, Pause } from "lucide-react";
+import { X, Loader2, Target, Sparkles, MapPin, ArrowRight, Mic, Square, Trash2, Play, Pause, LayoutTemplate } from "lucide-react";
+import { toast } from "@/hooks/useToast";
+import { TemplateSelector } from "./TemplateSelector";
+import { FeedbackTemplate, applyTemplate } from "@/lib/feedback-templates";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -36,6 +39,7 @@ export function FeedbackModal({
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<FeedbackPriority>("medium");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<FeedbackTemplate | null>(null);
 
   // Audio recording states
   const [isRecording, setIsRecording] = useState(false);
@@ -61,8 +65,18 @@ export function FeedbackModal({
       setAudioUrl(null);
       setRecordingTime(0);
       setIsPlaying(false);
+      setSelectedTemplate(null);
     }
   }, [isOpen]);
+
+  // Handle template selection
+  const handleTemplateSelect = useCallback((template: FeedbackTemplate) => {
+    setSelectedTemplate(template);
+    const applied = applyTemplate(template, title, description);
+    setTitle(applied.title);
+    setDescription(applied.content);
+    setPriority(applied.priority);
+  }, [title, description]);
 
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -103,7 +117,7 @@ export function FeedbackModal({
       }, 1000);
     } catch (error) {
       console.error("Error accessing microphone:", error);
-      alert("Nao foi possivel acessar o microfone. Verifique as permissoes.");
+      toast.error("Microfone não disponível", "Verifique as permissões do navegador");
     }
   };
 
@@ -184,7 +198,7 @@ export function FeedbackModal({
       }
     } catch (error) {
       console.error("[FeedbackModal] Error uploading audio:", error);
-      alert("Erro ao fazer upload do audio. O feedback sera criado sem audio.");
+      toast.warning("Audio não enviado", "O feedback será criado sem o audio");
       return undefined;
     } finally {
       setIsUploading(false);
@@ -218,6 +232,7 @@ export function FeedbackModal({
       setTitle("");
       setDescription("");
       setPriority("medium");
+      setSelectedTemplate(null);
       deleteRecording();
       onClose();
     } catch (error) {
@@ -228,16 +243,21 @@ export function FeedbackModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="feedback-modal-title"
+    >
       <div className="w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-auto sm:m-4 bg-[#0A0A0A] rounded-t-2xl sm:rounded-2xl border border-white/10 shadow-2xl">
         {/* Header - Responsivo */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 sticky top-0 bg-[#0A0A0A] z-10">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-              <Target className="w-4 sm:w-5 h-4 sm:h-5 text-white" />
+              <Target className="w-4 sm:w-5 h-4 sm:h-5 text-white" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="font-bold text-base sm:text-lg text-white">Nova Solicitacao</h2>
+              <h2 id="feedback-modal-title" className="font-bold text-base sm:text-lg text-white">Nova Solicitacao</h2>
               <p className="text-xs sm:text-sm text-white/50">Descreva a alteracao</p>
             </div>
           </div>
@@ -246,8 +266,9 @@ export function FeedbackModal({
             size="icon"
             onClick={onClose}
             className="text-white/50 hover:text-white hover:bg-white/10 rounded-lg sm:rounded-xl h-8 w-8 sm:h-10 sm:w-10"
+            aria-label="Fechar modal"
           >
-            <X className="w-4 sm:w-5 h-4 sm:h-5" />
+            <X className="w-4 sm:w-5 h-4 sm:h-5" aria-hidden="true" />
           </Button>
         </div>
 
@@ -262,7 +283,7 @@ export function FeedbackModal({
             <div className="relative rounded-xl overflow-hidden border border-white/10 bg-neutral-900">
               <img
                 src={screenshot}
-                alt="Screenshot"
+                alt="Captura de tela do local selecionado para o feedback"
                 className="w-full h-auto max-h-48 object-contain"
               />
               <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
@@ -272,6 +293,18 @@ export function FeedbackModal({
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Template Selector */}
+          <div>
+            <Label className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+              <LayoutTemplate className="w-4 h-4 text-purple-400" />
+              Tipo de Feedback
+            </Label>
+            <TemplateSelector
+              selectedTemplate={selectedTemplate}
+              onSelect={handleTemplateSelect}
+            />
           </div>
 
           {/* Title */}

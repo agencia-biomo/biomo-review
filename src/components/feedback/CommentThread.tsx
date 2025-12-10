@@ -20,6 +20,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { formatRelativeDate } from "@/lib/date-utils";
+import { toast } from "@/hooks/useToast";
 
 interface CommentThreadProps {
   feedbackId: string;
@@ -188,13 +189,13 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
     files.forEach(file => {
       // Check file size
       if (file.size > MAX_FILE_SIZE) {
-        alert(`Arquivo "${file.name}" excede o limite de 30MB`);
+        toast.warning("Arquivo muito grande", `"${file.name}" excede o limite de 30MB`);
         return;
       }
 
       // Check total files limit
       if (attachments.length + validFiles.length >= MAX_FILES) {
-        alert(`Maximo de ${MAX_FILES} arquivos permitidos`);
+        toast.warning("Limite atingido", `Máximo de ${MAX_FILES} arquivos permitidos`);
         return;
       }
 
@@ -271,7 +272,7 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
 
     } catch (error) {
       console.error("Error starting recording:", error);
-      alert("Nao foi possivel acessar o microfone. Verifique as permissoes.");
+      toast.error("Microfone não disponível", "Verifique as permissões do navegador");
     }
   };
 
@@ -410,13 +411,14 @@ export function CommentThread({ feedbackId, authorRole = "client" }: CommentThre
         setAttachmentPreviews([]);
         deleteAudio();
         await loadComments();
+        toast.success("Comentário enviado!");
       } else {
         console.error("[CommentThread] API error:", data.error);
-        alert(`Erro: ${data.error || "Falha ao enviar comentário"}`);
+        toast.error("Erro ao enviar", data.error || "Falha ao enviar comentário");
       }
     } catch (error) {
       console.error("[CommentThread] Error submitting comment:", error);
-      alert("Erro ao enviar comentario. Tente novamente.");
+      toast.error("Erro ao enviar", "Tente novamente");
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);

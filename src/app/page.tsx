@@ -22,6 +22,11 @@ import {
   List,
   ArrowUpRight,
 } from "lucide-react";
+import { toast } from "@/hooks/useToast";
+import { ProjectCardSkeletonGrid, ProjectCardSkeletonList } from "@/components/skeletons";
+import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
+import { SkipLinkTarget } from "@/components/a11y";
+import { OnboardingTour } from "@/components/onboarding";
 
 export default function Home() {
   const router = useRouter();
@@ -85,7 +90,7 @@ export default function Home() {
     const link = `${baseUrl}/p/${project.publicAccessToken}`;
     try {
       await navigator.clipboard.writeText(link);
-      alert("Link copiado para a area de transferencia!");
+      toast.success("Link copiado!", "Compartilhe com seu cliente");
     } catch {
       prompt("Copie o link:", link);
     }
@@ -136,7 +141,8 @@ export default function Home() {
         <Sidebar />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto" role="main" aria-label="Conteudo principal">
+        <SkipLinkTarget />
         {/* Hero Header */}
         <div className="relative overflow-hidden border-b border-white/10">
           {/* Background Effects */}
@@ -239,10 +245,11 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 sm:pl-11 h-10 sm:h-11 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-500/50 focus:ring-purple-500/20 rounded-xl text-sm"
+                aria-label="Buscar projetos"
               />
             </div>
 
-            <div className="flex items-center justify-between sm:justify-start gap-2">
+            <div className="flex items-center justify-between sm:justify-start gap-2" role="group" aria-label="Modo de visualizacao">
               <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -251,8 +258,10 @@ export default function Home() {
                       ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
                       : "text-white/50 hover:text-white"
                   }`}
+                  aria-label="Visualizacao em grade"
+                  aria-pressed={viewMode === "grid"}
                 >
-                  <LayoutGrid className="w-4 h-4" />
+                  <LayoutGrid className="w-4 h-4" aria-hidden="true" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
@@ -261,8 +270,10 @@ export default function Home() {
                       ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
                       : "text-white/50 hover:text-white"
                   }`}
+                  aria-label="Visualizacao em lista"
+                  aria-pressed={viewMode === "list"}
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -270,12 +281,11 @@ export default function Home() {
 
           {/* Projects Grid */}
           {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center">
-                <div className="w-12 h-12 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin mx-auto mb-4" />
-                <p className="text-sm text-white/50">Carregando projetos...</p>
-              </div>
-            </div>
+            viewMode === "grid" ? (
+              <ProjectCardSkeletonGrid count={4} />
+            ) : (
+              <ProjectCardSkeletonList count={4} />
+            )
           ) : filteredProjects.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               {projects.length === 0 ? (
@@ -308,23 +318,29 @@ export default function Home() {
               )}
             </div>
           ) : (
-            <div className={`
+            <div
+              data-tour="projects-grid"
+              className={`
               ${viewMode === "grid"
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5"
                 : "space-y-2 sm:space-y-3"
               }
-            `}>
+            `}
+              role="list"
+              aria-label="Lista de projetos"
+            >
               {filteredProjects.map((project, index) => (
                 <div
                   key={project.id}
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 0.05}s` }}
+                  role="listitem"
                 >
                   <ProjectCard
                     project={project}
                     viewMode={viewMode}
                     onOpen={() => handleOpenProject(project.id)}
-                    onEdit={() => alert("Em breve: edicao de projeto")}
+                    onEdit={() => toast.info("Em breve", "Edição de projeto será implementada")}
                     onDelete={() => handleDeleteProject(project.id)}
                     onCopyLink={() => handleCopyLink(project)}
                   />
@@ -341,6 +357,30 @@ export default function Home() {
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleCreateProject}
         />
+
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          onNewProject={() => setIsModalOpen(true)}
+          onCopyLink={() => {
+            const firstProject = projects[0];
+            if (firstProject) {
+              const link = `${window.location.origin}/p/${firstProject.publicAccessToken}`;
+              navigator.clipboard.writeText(link);
+              toast.success("Link copiado!", "Link do primeiro projeto copiado");
+            } else {
+              toast.warning("Nenhum projeto", "Crie um projeto primeiro");
+            }
+          }}
+          onShowShortcuts={() => {
+            toast.info(
+              "Atalhos de Teclado",
+              "⌘K: Busca rápida | N: Novo projeto | T: Alternar tema"
+            );
+          }}
+        />
+
+        {/* Onboarding Tour */}
+        <OnboardingTour />
       </div>
     </MobileNavProvider>
   );

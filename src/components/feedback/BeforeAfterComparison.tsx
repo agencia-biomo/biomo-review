@@ -14,6 +14,7 @@ import {
   Check,
   Loader2,
 } from "lucide-react";
+import { toast } from "@/hooks/useToast";
 
 interface BeforeAfterComparisonProps {
   beforeImage: string; // Original screenshot from feedback
@@ -74,7 +75,7 @@ export function BeforeAfterComparison({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Por favor, selecione uma imagem");
+      toast.warning("Formato inválido", "Por favor, selecione uma imagem");
       return;
     }
 

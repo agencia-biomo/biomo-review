@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Project } from "@/types";
 import { Button } from "@/components/ui/button";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   ExternalLink,
   Settings,
@@ -131,7 +132,8 @@ function SiteFavicon({ url, className = "" }: { url: string; className?: string 
       )}
       <img
         src={faviconUrl}
-        alt="Site favicon"
+        alt=""
+        aria-hidden="true"
         className={`${className} ${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
         onLoad={() => setLoading(false)}
         onError={() => {
@@ -155,6 +157,7 @@ export function ProjectCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // Extract domain from URL for display
   const getDomain = (url: string) => {
@@ -170,30 +173,37 @@ export function ProjectCard({
     ? Math.round((feedbackStats.completed / totalFeedbacks) * 100)
     : 0;
 
-  // 3D Tilt effect handler
+  // 3D Tilt effect handler (disabled when reduced motion is preferred)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || prefersReducedMotion) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
     setMousePosition({ x, y });
   };
 
-  const tiltStyle = isHovered
-    ? {
-        transform: `perspective(1000px) rotateX(${(mousePosition.y - 0.5) * -8}deg) rotateY(${(mousePosition.x - 0.5) * 8}deg) scale3d(1.02, 1.02, 1.02)`,
-        transition: "transform 0.1s ease-out",
-      }
-    : {
-        transform: "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
-        transition: "transform 0.4s ease-out",
-      };
+  // Disable 3D tilt effect when user prefers reduced motion (accessibility)
+  const tiltStyle = prefersReducedMotion
+    ? {} // No 3D transforms when reduced motion is enabled
+    : isHovered
+      ? {
+          transform: `perspective(1000px) rotateX(${(mousePosition.y - 0.5) * -8}deg) rotateY(${(mousePosition.x - 0.5) * 8}deg) scale3d(1.02, 1.02, 1.02)`,
+          transition: "transform 0.1s ease-out",
+        }
+      : {
+          transform: "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+          transition: "transform 0.4s ease-out",
+        };
 
   if (viewMode === "list") {
     return (
-      <div
+      <article
         className="group p-4 rounded-xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-purple-500/30 transition-all cursor-pointer relative overflow-hidden"
         onClick={onOpen}
+        onKeyDown={(e) => e.key === 'Enter' && onOpen()}
+        tabIndex={0}
+        role="button"
+        aria-label={`Projeto ${project.name}, ${totalFeedbacks} feedbacks`}
       >
         {/* Glow effect on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
@@ -310,23 +320,24 @@ export function ProjectCard({
               }}
             >
               Abrir
-              <ArrowRight className="w-4 h-4 ml-1" />
+              <ArrowRight className="w-4 h-4 ml-1" aria-hidden="true" />
             </Button>
           </div>
         </div>
-      </div>
+      </article>
     );
   }
 
   // Grid View - Premium
   return (
-    <div
+    <article
       ref={cardRef}
       className="group rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-purple-500/40 transition-all overflow-hidden relative"
       style={tiltStyle}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      aria-label={`Projeto ${project.name}`}
     >
       {/* Animated border glow */}
       <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm pointer-events-none animate-border-flow" />
@@ -392,13 +403,15 @@ export function ProjectCard({
             )}
           </div>
 
-          {/* Spotlight effect following mouse */}
-          <div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)`,
-            }}
-          />
+          {/* Spotlight effect following mouse (disabled when reduced motion is preferred) */}
+          {!prefersReducedMotion && (
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              style={{
+                background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)`,
+              }}
+            />
+          )}
 
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -551,6 +564,6 @@ export function ProjectCard({
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

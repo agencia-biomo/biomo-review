@@ -734,3 +734,52 @@ html.dark .glass {
 .animate-breathe {
   animation: breathe 4s ease-in-out infinite;
 }
+
+/* ========================================
+   Reduce Motion Support (WCAG 2.1 AAA)
+   ======================================== */
+
+/* When user prefers reduced motion, disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep essential UI feedback but make it instant */
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-ping,
+  .animate-shimmer,
+  .animate-shimmer-slide,
+  .animate-breathe,
+  .animate-fade-in,
+  .animate-tilt,
+  .animate-morph-gradient {
+    animation: none !important;
+  }
+
+  /* Disable 3D transforms that can cause motion sickness */
+  .perspective-1000,
+  [style*="perspective"],
+  [style*="rotateX"],
+  [style*="rotateY"] {
+    transform: none !important;
+    perspective: none !important;
+  }
+}
+
+/* Class to programmatically disable motion (for JS control) */
+.reduce-motion,
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

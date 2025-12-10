@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { User, Client, UserRole } from "@/types";
 import { formatRelativeDate } from "@/lib/date-utils";
+import { toast } from "@/hooks/useToast";
+import { AdminCardSkeletonGrid } from "@/components/skeletons";
 
 type TabType = "team" | "clients";
 
@@ -134,12 +136,13 @@ export default function AdminPage() {
         setEditingUser(null);
         setUserForm({ name: "", email: "", role: "team" });
         loadUsers();
+        toast.success(editingUser ? "Usuário atualizado!" : "Usuário criado!");
       } else {
-        alert(data.error || "Erro ao salvar usuário");
+        toast.error(data.error || "Erro ao salvar usuário");
       }
     } catch (error) {
       console.error("Error saving user:", error);
-      alert("Erro ao salvar usuário");
+      toast.error("Erro ao salvar usuário");
     } finally {
       setIsSavingUser(false);
     }
@@ -166,12 +169,13 @@ export default function AdminPage() {
         setEditingClient(null);
         setClientForm({ name: "", email: "", phone: "", company: "" });
         loadClients();
+        toast.success(editingClient ? "Cliente atualizado!" : "Cliente criado!");
       } else {
-        alert(data.error || "Erro ao salvar cliente");
+        toast.error(data.error || "Erro ao salvar cliente");
       }
     } catch (error) {
       console.error("Error saving client:", error);
-      alert("Erro ao salvar cliente");
+      toast.error("Erro ao salvar cliente");
     } finally {
       setIsSavingClient(false);
     }
@@ -186,11 +190,13 @@ export default function AdminPage() {
       const data = await response.json();
       if (data.success) {
         loadUsers();
+        toast.success("Usuário removido!");
       } else {
-        alert(data.error || "Erro ao remover usuário");
+        toast.error(data.error || "Erro ao remover usuário");
       }
     } catch (error) {
       console.error("Error deleting user:", error);
+      toast.error("Erro ao remover usuário");
     }
   };
 
@@ -203,11 +209,13 @@ export default function AdminPage() {
       const data = await response.json();
       if (data.success) {
         loadClients();
+        toast.success("Cliente removido!");
       } else {
-        alert(data.error || "Erro ao remover cliente");
+        toast.error(data.error || "Erro ao remover cliente");
       }
     } catch (error) {
       console.error("Error deleting client:", error);
+      toast.error("Erro ao remover cliente");
     }
   };
 
@@ -333,12 +341,11 @@ export default function AdminPage() {
           <div className="p-4 sm:p-6 lg:p-8">
             {activeTab === "team" ? (
               // Users Grid
+              isLoadingUsers ? (
+                <AdminCardSkeletonGrid count={6} />
+              ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {isLoadingUsers ? (
-                  <div className="col-span-full flex items-center justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                  </div>
-                ) : filteredUsers.length === 0 ? (
+                {filteredUsers.length === 0 ? (
                   <div className="col-span-full text-center py-12">
                     <UserCircle className="w-12 h-12 text-white/20 mx-auto mb-3" />
                     <p className="text-white/50">Nenhum usuário encontrado</p>
@@ -395,14 +402,14 @@ export default function AdminPage() {
                   ))
                 )}
               </div>
+              )
             ) : (
               // Clients Grid
+              isLoadingClients ? (
+                <AdminCardSkeletonGrid count={6} />
+              ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {isLoadingClients ? (
-                  <div className="col-span-full flex items-center justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                  </div>
-                ) : filteredClients.length === 0 ? (
+                {filteredClients.length === 0 ? (
                   <div className="col-span-full text-center py-12">
                     <Building2 className="w-12 h-12 text-white/20 mx-auto mb-3" />
                     <p className="text-white/50">Nenhum cliente encontrado</p>
@@ -512,6 +519,7 @@ export default function AdminPage() {
                   ))
                 )}
               </div>
+              )
             )}
           </div>
         </main>
