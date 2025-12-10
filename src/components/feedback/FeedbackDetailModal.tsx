@@ -168,10 +168,10 @@ export function FeedbackDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden m-4 bg-[#0A0A0A] rounded-2xl border border-white/10 shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden sm:m-4 bg-[#0A0A0A] rounded-t-2xl sm:rounded-2xl border border-white/10 shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-start justify-between p-5 border-b border-white/10">
+        <div className="flex items-start justify-between p-4 sm:p-5 border-b border-white/10 sticky top-0 bg-[#0A0A0A] z-10">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -234,7 +234,7 @@ export function FeedbackDetailModal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5">
           {/* Screenshot */}
           {feedback.screenshot && (
             <div className="relative group rounded-xl overflow-hidden border border-white/10">
@@ -299,7 +299,7 @@ export function FeedbackDetailModal({
           )}
 
           {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
               <div className="flex items-center gap-2 text-white/50 mb-1">
                 <Clock className="w-4 h-4" />
@@ -344,7 +344,7 @@ export function FeedbackDetailModal({
               Status
             </label>
             {canChangeStatus ? (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {statusOptions.map((status) => {
                   const Icon = status.icon;
                   const isActive = feedback.status === status.value;
@@ -354,7 +354,7 @@ export function FeedbackDetailModal({
                       onClick={() => handleStatusChange(status.value)}
                       disabled={isUpdating}
                       className={`
-                        flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all border
+                        flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-all border
                         ${isActive
                           ? `bg-gradient-to-r ${status.gradient} text-white border-transparent shadow-lg`
                           : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
@@ -388,7 +388,7 @@ export function FeedbackDetailModal({
 
           {/* Edit Mode - Assignment & Deadline */}
           {isEditing && (
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-purple-500/10 border border-purple-500/30">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-purple-500/10 border border-purple-500/30">
               <div>
                 <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
                   <UserPlus className="w-4 h-4 text-purple-400" />
@@ -419,12 +419,12 @@ export function FeedbackDetailModal({
                   className="bg-white/5 border-white/20 text-white"
                 />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-1 sm:col-span-2">
                 <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-purple-400" />
                   Prioridade
                 </label>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 sm:flex gap-2">
                   {priorityOptions.map((p) => (
                     <button
                       key={p.value}

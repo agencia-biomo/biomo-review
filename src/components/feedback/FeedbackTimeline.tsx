@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, DragEvent } from "react";
+import { useState, useCallback, useEffect, DragEvent } from "react";
 import { Feedback, STATUS_COLORS, STATUS_LABELS, PRIORITY_COLORS, PRIORITY_LABELS, FeedbackPriority } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +80,15 @@ export function FeedbackTimeline({
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  // Detect touch device on mount
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  // Disable drag and drop on touch devices (HTML5 drag and drop doesn't work well on mobile)
+  const canDragDrop = enableDragDrop && !isTouchDevice;
 
   // Drag and drop state
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -88,11 +97,11 @@ export function FeedbackTimeline({
 
   // Drag and drop handlers
   const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>, feedback: Feedback) => {
-    if (!enableDragDrop) return;
+    if (!canDragDrop) return;
     setDraggedId(feedback.id);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", feedback.id);
-  }, [enableDragDrop]);
+  }, [canDragDrop]);
 
   const handleDragEnd = useCallback(() => {
     setDraggedId(null);
@@ -101,7 +110,7 @@ export function FeedbackTimeline({
   }, []);
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>, feedback: Feedback) => {
-    if (!enableDragDrop) return;
+    if (!canDragDrop) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
 
@@ -113,7 +122,7 @@ export function FeedbackTimeline({
 
     setDragOverId(feedback.id);
     setDragPosition(position);
-  }, [enableDragDrop, draggedId]);
+  }, [canDragDrop, draggedId]);
 
   const handleDragLeave = useCallback(() => {
     setDragOverId(null);
@@ -121,7 +130,7 @@ export function FeedbackTimeline({
   }, []);
 
   const handleDrop = useCallback((e: DragEvent<HTMLDivElement>, targetFeedback: Feedback) => {
-    if (!enableDragDrop || !onReorder) return;
+    if (!canDragDrop || !onReorder) return;
     e.preventDefault();
 
     const draggedItemId = e.dataTransfer.getData("text/plain");
@@ -148,7 +157,7 @@ export function FeedbackTimeline({
     setDraggedId(null);
     setDragOverId(null);
     setDragPosition(null);
-  }, [enableDragDrop, feedbacks, onReorder, dragPosition]);
+  }, [canDragDrop, feedbacks, onReorder, dragPosition]);
 
   // Get unique assignees
   const assignees = [...new Set(feedbacks.filter(f => f.assignedTo).map(f => f.assignedTo!))];
@@ -750,7 +759,7 @@ export function FeedbackTimeline({
               return (
                 <div
                   key={feedback.id}
-                  draggable={enableDragDrop}
+                  draggable={canDragDrop}
                   onDragStart={(e) => handleDragStart(e, feedback)}
                   onDragEnd={handleDragEnd}
                   onDragOver={(e) => handleDragOver(e, feedback)}
@@ -761,7 +770,7 @@ export function FeedbackTimeline({
                   data-drag-position={isDragOver ? dragPosition : null}
                   className={`
                     group cursor-pointer transition-all duration-200 overflow-hidden rounded-lg sm:rounded-xl active:scale-[0.98]
-                    ${enableDragDrop ? "draggable-item" : ""}
+                    ${canDragDrop ? "draggable-item" : ""}
                     ${isSelected
                       ? "bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20"
                       : "bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-purple-500/30"
@@ -817,9 +826,9 @@ export function FeedbackTimeline({
 
                   {/* Content - Responsivo */}
                   <div className="p-2.5 sm:p-3 relative">
-                    {/* Drag handle */}
-                    {enableDragDrop && (
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Drag handle - hidden on touch devices */}
+                    {canDragDrop && (
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
                         <GripVertical className="w-4 h-4 text-white/30" />
                       </div>
                     )}
