@@ -15,6 +15,8 @@ import {
   Sparkles,
   Bell,
   HelpCircle,
+  Users,
+  BarChart3,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -36,6 +38,18 @@ const menuItems = [
     href: "/",
     icon: FolderKanban,
     description: "Gerenciar projetos",
+  },
+  {
+    label: "Métricas",
+    href: "/metricas",
+    icon: BarChart3,
+    description: "Relatórios e análises",
+  },
+  {
+    label: "Administração",
+    href: "/admin",
+    icon: Users,
+    description: "Equipe e clientes",
   },
 ];
 

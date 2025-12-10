@@ -14,6 +14,8 @@ import {
   X,
   Sparkles,
   ChevronRight,
+  Users,
+  BarChart3,
 } from "lucide-react";
 
 // Context for mobile nav state
@@ -82,6 +84,18 @@ export function MobileDrawer() {
       href: "/",
       icon: FolderKanban,
       description: "Gerenciar projetos",
+    },
+    {
+      label: "Métricas",
+      href: "/metricas",
+      icon: BarChart3,
+      description: "Relatórios e análises",
+    },
+    {
+      label: "Administração",
+      href: "/admin",
+      icon: Users,
+      description: "Equipe e clientes",
     },
   ];
 
